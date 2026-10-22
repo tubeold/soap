@@ -246,10 +246,10 @@
             const targetProfileId = urlParams.get('id'); 
             
             const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
-            let profileUserId = currentUser.id; // По умолчанию свой ID
+            let profileUserId = currentUser.id; // По умолчанию свой ID (исправлено!)
             let isOwnProfile = true;
 
-            // Если в ссылке есть id
+            // Если в ссылке есть id и он отличается от нашего
             if (targetProfileId) {
                 // Ищем пользователя по username
                 const usersRef = collection(db, "accounts");
