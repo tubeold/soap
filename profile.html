@@ -213,12 +213,24 @@
         }
 
         // === ОСНОВНАЯ ЛОГИКА ===
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверка авторизации
             if (!isUserLoggedIn()) {
                 window.location.href = 'registration.html';
                 return;
             }
 
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetProfileId = urlParams.get('id');
+
+            // ГЛАВНОЕ ИСПРАВЛЕНИЕ: Если в URL нет id — редирект на свой профиль
+            if (!targetProfileId) {
+                const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
+                window.location.replace(`profile.html?id=${currentUser.username}`);
+                return;
+            }
+
+            // Показываем интерфейс
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('main-app').style.display = 'block';
 
@@ -241,35 +253,33 @@
                 if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
             });
 
-            // Определяем, чей профиль показывать
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetProfileId = urlParams.get('id'); 
-            
+            // Запускаем асинхронную загрузку данных
+            loadProfileData(targetProfileId);
+        });
+
+        async function loadProfileData(targetProfileId) {
             const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
-            let profileUserId = currentUser.id; // По умолчанию свой ID (исправлено!)
+            let profileUserId = currentUser.id;
             let isOwnProfile = true;
 
-            // Если в ссылке есть id и он отличается от нашего
-            if (targetProfileId) {
-                // Ищем пользователя по username
-                const usersRef = collection(db, "accounts");
-                const qUsername = query(usersRef, where("username", "==", targetProfileId));
-                const snapUsername = await getDocs(qUsername);
-                
-                if (!snapUsername.empty) {
-                    profileUserId = snapUsername.docs[0].id;
+            // Ищем пользователя по username или ID
+            const usersRef = collection(db, "accounts");
+            const qUsername = query(usersRef, where("username", "==", targetProfileId));
+            const snapUsername = await getDocs(qUsername);
+            
+            if (!snapUsername.empty) {
+                profileUserId = snapUsername.docs[0].id;
+                if (profileUserId !== currentUser.id) isOwnProfile = false;
+            } else {
+                // Пробуем по ID документа
+                const docRef = doc(db, "accounts", targetProfileId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    profileUserId = docSnap.id;
                     if (profileUserId !== currentUser.id) isOwnProfile = false;
                 } else {
-                    // Пробуем по ID документа
-                    const docRef = doc(db, "accounts", targetProfileId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        profileUserId = docSnap.id;
-                        if (profileUserId !== currentUser.id) isOwnProfile = false;
-                    } else {
-                        document.getElementById('profile-content').innerHTML = `<div class="empty-state">Пользователь не найден.</div>`;
-                        return;
-                    }
+                    document.getElementById('profile-content').innerHTML = `<div class="empty-state">Пользователь не найден.</div>`;
+                    return;
                 }
             }
 
@@ -387,7 +397,7 @@
                 console.error("Ошибка загрузки профиля:", error);
                 document.getElementById('profile-content').innerHTML = `<div class="empty-state" style="color:red;">Ошибка загрузки данных. Попробуйте позже.</div>`;
             }
-        });
+        }
     </script>
 </body>
 </html>
