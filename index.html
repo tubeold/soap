@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soap AI - Главная</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #ffffff; --surface-color: #f5f5f5; --text-primary: #212121;
+            --text-secondary: #757575; --primary-color: #1a1a2e; --accent-color: #a8e6cf; 
+            --border-color: #e0e0e0; --header-bg: #ffffff; --hover-bg: #eeeeee; --sidebar-bg: #ffffff;
+            --error-color: #d32f2f;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212; --surface-color: #1e1e1e; --text-primary: #e0e0e0;
+                --text-secondary: #9e9e9e; --primary-color: #a8e6cf; --accent-color: #1a1a2e;
+                --border-color: #333333; --header-bg: #1e1e1e; --hover-bg: #2c2c2c; --sidebar-bg: #1e1e1e;
+            }
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-primary); transition: background-color 0.3s; padding-bottom: 60px; overflow-x: hidden; }
+        
+        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background-color: var(--header-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo-container img { height: 32px; border-radius: 4px; }
+        .menu-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .menu-btn:hover { background-color: var(--hover-bg); }
+        
+        .search-bar-container { flex-grow: 1; margin: 0 16px; display: flex; justify-content: center; max-width: 600px; }
+        .search-input-wrapper { display: flex; align-items: center; background-color: var(--surface-color); border-radius: 24px; padding: 8px 16px; width: 100%; border: 1px solid var(--border-color); }
+        .search-input-wrapper input { background: none; border: none; color: var(--text-primary); outline: none; font-size: 14px; width: 100%; }
+        
+        /* Меню (Drawer) */
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; padding: 16px 0; display: flex; flex-direction: column; }
+        .drawer.open { left: 0; }
+        .drawer-header { padding: 0 16px 16px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        
+        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
+        .drawer-item:hover { background-color: var(--hover-bg); }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 150; display: none; }
+        .overlay.active { display: block; }
+        
+        .dropdown-menu { position: absolute; top: 60px; right: 16px; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 200px; z-index: 101; }
+        .dropdown-menu.active { display: flex; }
+        
+        .dropdown-menu a { padding: 12px 16px; text-decoration: none; color: var(--text-primary); font-size: 14px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        .dropdown-menu a:hover { background-color: var(--hover-bg); }
+        
+        #app { max-width: 800px; margin: 0 auto; padding: 16px; }
+        
+        .bot-list-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; color: var(--text-primary); }
+        .bot-list-item:hover { background-color: var(--hover-bg); }
+        .bot-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+        .bot-info { flex-grow: 1; min-width: 0; }
+        .bot-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .bot-desc { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 4px; }
+        
+        /* Стили для пустых состояний */
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div id="main-app">
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Боковое меню -->
+        <div class="drawer" id="drawer">
+            <div class="drawer-header">
+                <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Logo" style="height: 24px;">
+                <span style="font-weight: 700; font-size: 18px;">Soap AI</span>
+            </div>
+            
+            <a class="drawer-item" href="index.html">
+                <span class="material-icons-outlined">home</span> Главная
+            </a>
+            
+            <a class="drawer-item" onclick="checkAuthAndGo('profile.html')">
+                <span class="material-icons-outlined">person</span> Профиль
+            </a>
+            <a class="drawer-item" onclick="checkAuthAndGo('create.html')">
+                <span class="material-icons-outlined">add_circle_outline</span> Создать бота
+            </a>
+            <a class="drawer-item" onclick="checkAuthAndGo('settings.html')">
+                <span class="material-icons-outlined">settings</span> Настройки
+            </a>
+            
+            <a class="drawer-item" id="logout-btn" onclick="logout()" style="color: red; margin-top: auto; display: none;">
+                <span class="material-icons-outlined" style="color: red;">logout</span> Выйти
+            </a>
+            
+            <a class="drawer-item" id="login-btn" onclick="window.location.href='registration.html'" style="color: var(--primary-color); margin-top: auto;">
+                <span class="material-icons-outlined" style="color: var(--primary-color);">login</span> Войти
+            </a>
+        </div>
+
+        <header>
+            <div class="header-left">
+                <button class="menu-btn" id="drawerBtn">
+                    <span class="material-icons-outlined">menu</span>
+                </button>
+                <div class="logo-container" onclick="window.location.href='index.html'" style="cursor:pointer;">
+                    <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Soap AI">
+                </div>
+            </div>
+
+            <div class="search-bar-container">
+                <div class="search-input-wrapper">
+                    <span class="material-icons-outlined">search</span>
+                    <input type="text" placeholder="Поиск ботов..." id="globalSearchInput">
+                </div>
+            </div>
+
+            <button class="menu-btn" id="menuBtn">
+                <span class="material-icons-outlined">more_vert</span>
+            </button>
+        </header>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a onclick="checkAuthAndGo('profile.html')">Профиль</a>
+            <a onclick="checkAuthAndGo('create.html')">Создать бота</a>
+            <a onclick="checkAuthAndGo('settings.html')">Настройки</a>
+            <a onclick="window.location.href='registration.html'" id="menu-login" style="color: var(--primary-color);">Войти</a>
+            <a onclick="logout()" id="menu-logout" style="color: red; display: none;">Выйти</a>
+        </div>
+
+        <main id="app">
+            <div id="page-content"></div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDijBugjXGUSD38usVRk2e_jwOou3Aw7p8",
+            authDomain: "soapsai.firebaseapp.com",
+            projectId: "soapsai",
+            storageBucket: "soapsai.firebasestorage.app",
+            messagingSenderId: "354128379628",
+            appId: "1:354128379628:web:1bc5980f4968deeecbefc9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const CLOUD_NAME = "dmhoqxtc";
+
+        // Проверка авторизации
+        window.isUserLoggedIn = () => {
+            return localStorage.getItem('soaps_user') !== null;
+        };
+
+        window.checkAuthAndGo = (url) => {
+            if (isUserLoggedIn()) {
+                window.location.href = url;
+            } else {
+                window.location.href = 'registration.html';
+            }
+        };
+
+        // Клик по боту (БЕЗ ЛОКАЛСТОРАДЖА, только ID)
+        window.openBot = (botId) => {
+            window.location.href = `chat.html?id=${botId}`;
+        };
+
+        window.logout = () => {
+            localStorage.removeItem('soaps_user');
+            window.location.reload();
+        };
+
+        // Парсер BBCode (для красивого отображения описания)
+        function parseBBCode(text) {
+            if (!text) return "";
+            let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            safeText = safeText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            safeText = safeText.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+            safeText = safeText.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, (match, color, content) => `<span style="color: ${color.trim()};">${content}</span>`);
+            safeText = safeText.replace(/\n/g, '<br>');
+            return safeText;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedIn = isUserLoggedIn();
+            
+            if (loggedIn) {
+                document.getElementById('logout-btn').style.display = 'flex';
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('menu-logout').style.display = 'block';
+                document.getElementById('menu-login').style.display = 'none';
+            }
+
+            // Обработчики меню
+            document.getElementById('drawerBtn').addEventListener('click', () => {
+                document.getElementById('drawer').classList.add('open');
+                document.getElementById('overlay').classList.add('active');
+            });
+            document.getElementById('overlay').addEventListener('click', () => {
+                document.getElementById('drawer').classList.remove('open');
+                document.getElementById('overlay').classList.remove('active');
+            });
+            document.getElementById('menuBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('dropdownMenu').classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                const menu = document.getElementById('dropdownMenu');
+                const btn = document.getElementById('menuBtn');
+                if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
+            });
+
+            loadBots();
+        });
+
+        // Загрузка ботов из Firebase
+        async function loadBots() {
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <h2 style="margin-bottom: 16px; font-size: 20px;">Популярные боты</h2>
+                <div id="popular-list"><p style="color: var(--text-secondary);">Загрузка...</p></div>
+                <h2 style="margin: 24px 0 16px 0; font-size: 20px;">Последние боты</h2>
+                <div id="recent-list"><p style="color: var(--text-secondary);">Загрузка...</p></div>
+            `;
+
+            try {
+                const botsRef = collection(db, "bots");
+                const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
+                const userId = currentUser ? currentUser.id : null;
+
+                // Запрос для популярных (сортировка по лайкам)
+                const qPopular = query(botsRef, orderBy("stats.likes", "desc"), limit(10));
+                const popularSnapshot = await getDocs(qPopular);
+                
+                // Запрос для последних (сортировка по дате)
+                const qRecent = query(botsRef, orderBy("createdAt", "desc"), limit(10));
+                const recentSnapshot = await getDocs(qRecent);
+
+                const renderBots = (snapshot, containerId, emptyMsg) => {
+                    const listContainer = document.getElementById(containerId);
+                    let html = '';
+                    let count = 0;
+
+                    snapshot.forEach(doc => {
+                        const bot = doc.data();
+                        const botId = doc.id;
+                        
+                        // ЛОГИКА ПРИВАТНОСТИ: Показываем, если бот публичный ИЛИ это наш бот
+                        const isOwner = userId && bot.authorId === userId;
+                        const isPublic = bot.privacy === 'public';
+
+                        if (!isPublic && !isOwner) return; // Пропускаем чужие приватные
+
+                        count++;
+                        let avatarUrl = "https://i.ibb.co/B2gVk6pX/icon.png";
+                        if (bot.avatar) {
+                            avatarUrl = bot.avatar.startsWith('http') ? bot.avatar : `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}`;
+                        }
+
+                        html += `
+                            <div class="bot-list-item" onclick="openBot('${botId}')">
+                                <img src="${avatarUrl}" class="bot-avatar" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                <div class="bot-info">
+                                    <span class="bot-name">${bot.name || "Без названия"}</span>
+                                    <span class="bot-desc">${parseBBCode(bot.description || "Описание отсутствует")}</span>
+                                </div>
+                                ${!isPublic ? '<span class="material-icons-outlined" style="color: var(--text-secondary); font-size: 16px;">lock</span>' : ''}
+                            </div>
+                        `;
+                    });
+
+                    if (count === 0) {
+                        listContainer.innerHTML = `<p style="color: var(--text-secondary);">${emptyMsg}</p>`;
+                    } else {
+                        listContainer.innerHTML = html;
+                    }
+                };
+
+                renderBots(popularSnapshot, 'popular-list', 'Популярных ботов пока нет.');
+                renderBots(recentSnapshot, 'recent-list', 'Ботов пока нет.');
+
+            } catch (error) {
+                console.error("Ошибка Firebase:", error);
+                document.getElementById('popular-list').innerHTML = `<p style="color: red;">Ошибка загрузки. Проверьте базу данных.</p>`;
+                document.getElementById('recent-list').innerHTML = '';
+            }
+        }
+
+        // Поиск (заглушка, но можно сделать реальный фильтр)
+        document.getElementById('globalSearchInput')?.addEventListener('input', (e) => {
+            const queryText = e.target.value.toLowerCase();
+            document.querySelectorAll('.bot-list-item').forEach(el => {
+                const name = el.querySelector('.bot-name').textContent.toLowerCase();
+                el.style.display = name.includes(queryText) ? 'flex' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

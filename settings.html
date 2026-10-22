@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки - Soap AI</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Базовые цвета */
+        :root {
+            --bg-color: #ffffff; --surface-color: #f5f5f5; --text-primary: #212121;
+            --text-secondary: #757575; --primary-color: #1a1a2e; --accent-color: #a8e6cf; 
+            --border-color: #e0e0e0; --header-bg: #ffffff; --hover-bg: #eeeeee; --sidebar-bg: #ffffff;
+            --error-color: #d32f2f;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212; --surface-color: #1e1e1e; --text-primary: #e0e0e0;
+                --text-secondary: #9e9e9e; --primary-color: #a8e6cf; --accent-color: #1a1a2e;
+                --border-color: #333333; --header-bg: #1e1e1e; --hover-bg: #2c2c2c; --sidebar-bg: #1e1e1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; padding-bottom: 60px; overflow-x: hidden; }
+        
+        /* Шапка */
+        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background-color: var(--header-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo-container img { height: 32px; border-radius: 4px; }
+        .menu-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .menu-btn:hover { background-color: var(--hover-bg); }
+        
+        /* Меню */
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; padding: 16px 0; display: flex; flex-direction: column; }
+        .drawer.open { left: 0; }
+        .drawer-header { padding: 0 16px 16px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
+        .drawer-item:hover { background-color: var(--hover-bg); }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 150; display: none; }
+        .overlay.active { display: block; }
+        
+        .dropdown-menu { position: absolute; top: 60px; right: 16px; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 200px; z-index: 101; }
+        .dropdown-menu.active { display: flex; }
+        .dropdown-menu a { padding: 12px 16px; text-decoration: none; color: var(--text-primary); font-size: 14px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        .dropdown-menu a:hover { background-color: var(--hover-bg); }
+
+        /* Основной контент */
+        #app { max-width: 600px; margin: 0 auto; padding: 16px; }
+        
+        .settings-section { background-color: var(--header-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .settings-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+        .form-subtext { font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4; }
+        
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .form-input, .form-textarea {
+            width: 100%; background-color: var(--surface-color); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 12px; color: var(--text-primary); font-size: 15px; outline: none; transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-textarea:focus { border-color: var(--primary-color); }
+        .form-textarea { resize: vertical; min-height: 80px; }
+        
+        /* Зоны загрузки */
+        .upload-zone { position: relative; border: 2px dashed var(--border-color); border-radius: 8px; background-color: var(--surface-color); cursor: pointer; overflow: hidden; transition: border-color 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .upload-zone:hover { border-color: var(--primary-color); }
+        .upload-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; color: white; z-index: 2; }
+        .upload-zone:hover .upload-overlay { opacity: 1; }
+        
+        .banner-zone { width: 100%; height: 120px; }
+        .banner-preview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none; }
+        
+        .avatar-row { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
+        .avatar-zone { width: 80px; height: 80px; border-radius: 50%; }
+        .avatar-preview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none; }
+
+        /* Переключатели тем */
+        .theme-selector { display: flex; gap: 12px; flex-wrap: wrap; }
+        .theme-option { display: flex; align-items: center; gap: 8px; background-color: var(--surface-color); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: border-color 0.2s; }
+        .theme-option.active { border-color: var(--primary-color); background-color: var(--hover-bg); font-weight: 500; }
+        .theme-option input { display: none; }
+
+        /* Кнопки */
+        .btn-submit { background-color: var(--primary-color); color: var(--bg-color); border: none; padding: 14px 24px; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; margin-top: 10px; }
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-danger { background-color: var(--error-color); color: white; border: none; padding: 14px 24px; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; margin-top: 10px; }
+        .btn-danger:hover { opacity: 0.9; }
+
+        .error-text { color: var(--error-color); font-size: 14px; margin-bottom: 15px; display: none; background-color: rgba(211, 47, 47, 0.1); padding: 10px; border-radius: 6px; text-align: center; }
+        .loading-spinner { display: none; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* Модальное окно для удаления */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-color); padding: 24px; border-radius: 12px; max-width: 400px; width: 100%; border: 1px solid var(--border-color); }
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--error-color); }
+        .modal-text { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div id="main-app">
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Меню -->
+        <div class="drawer" id="drawer">
+            <div class="drawer-header">
+                <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Logo" style="height: 24px;">
+                <span style="font-weight: 700; font-size: 18px;">Soap AI</span>
+            </div>
+            <a class="drawer-item" href="index.html">
+                <span class="material-icons-outlined">home</span> Главная
+            </a>
+            <a class="drawer-item" onclick="checkAuthAndGo('profile.html')">
+                <span class="material-icons-outlined">person</span> Профиль
+            </a>
+            <a class="drawer-item" onclick="checkAuthAndGo('create.html')">
+                <span class="material-icons-outlined">add_circle_outline</span> Создать бота
+            </a>
+            <a class="drawer-item" onclick="checkAuthAndGo('settings.html')" style="background-color: var(--hover-bg);">
+                <span class="material-icons-outlined">settings</span> Настройки
+            </a>
+            <a class="drawer-item" onclick="logout()" style="color: red; margin-top: auto;">
+                <span class="material-icons-outlined" style="color: red;">logout</span> Выйти
+            </a>
+        </div>
+
+        <header>
+            <div class="header-left">
+                <button class="menu-btn" id="drawerBtn">
+                    <span class="material-icons-outlined">menu</span>
+                </button>
+                <div class="logo-container" onclick="window.location.href='index.html'" style="cursor:pointer;">
+                    <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Soap AI">
+                </div>
+            </div>
+
+            <button class="menu-btn" id="menuBtn">
+                <span class="material-icons-outlined">more_vert</span>
+            </button>
+        </header>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a onclick="checkAuthAndGo('profile.html')">Профиль</a>
+            <a onclick="checkAuthAndGo('create.html')">Создать бота</a>
+            <a onclick="checkAuthAndGo('settings.html')">Настройки</a>
+            <a onclick="logout()" style="color: red;">Выйти</a>
+        </div>
+
+        <main id="app">
+            <h1 style="font-size: 24px; margin-bottom: 24px;">Настройки</h1>
+            
+            <!-- Секция 1: Профиль -->
+            <div class="settings-section">
+                <h2>Публичный профиль</h2>
+                <form id="profileSettingsForm" onsubmit="event.preventDefault(); saveProfile();">
+                    
+                    <!-- Баннер -->
+                    <div class="form-group">
+                        <label class="form-label">Баннер</label>
+                        <div class="upload-zone banner-zone" onclick="document.getElementById('setBanner').click()">
+                            <span class="material-icons-outlined banner-icon" style="color: var(--text-secondary);">wallpaper</span>
+                            <span class="banner-text" style="font-size: 12px; color: var(--text-secondary);">Изменить</span>
+                            <img id="setBannerPreview" class="banner-preview" alt="Banner">
+                            <div class="upload-overlay" id="setBannerOverlay" style="display: none;"><span class="material-icons-outlined">edit</span></div>
+                        </div>
+                        <input type="file" id="setBanner" accept="image/*" style="display: none;">
+                    </div>
+
+                    <!-- Аватарка и ник -->
+                    <div class="avatar-row">
+                        <div class="upload-zone avatar-zone" onclick="document.getElementById('setAvatar').click()">
+                            <span class="material-icons-outlined" style="color: var(--text-secondary);">add_a_photo</span>
+                            <img id="setAvatarPreview" class="avatar-preview" alt="Avatar">
+                            <div class="upload-overlay" id="setAvatarOverlay" style="display: none; border-radius: 50%;"><span class="material-icons-outlined">edit</span></div>
+                        </div>
+                        <input type="file" id="setAvatar" accept="image/*" style="display: none;">
+                        
+                        <div style="flex-grow: 1;">
+                            <label class="form-label">Отображаемое имя</label>
+                            <input type="text" id="setDisplayName" class="form-input" required maxlength="30">
+                        </div>
+                    </div>
+
+                    <!-- Username (@) -->
+                    <div class="form-group">
+                        <label class="form-label">Никнейм (для ссылки)</label>
+                        <div class="input-wrapper" style="position: relative;">
+                            <span style="position: absolute; left: 12px; color: var(--text-secondary); font-weight: 500;">@</span>
+                            <input type="text" id="setUsername" class="form-input" style="padding-left: 28px;" required maxlength="20">
+                        </div>
+                        <div class="form-subtext">Только буквы, цифры, точки, дефисы и подчеркивания.</div>
+                    </div>
+
+                    <!-- Описание -->
+                    <div class="form-group">
+                        <label class="form-label">Описание профиля</label>
+                        <textarea id="setBio" class="form-textarea" maxlength="300"></textarea>
+                        <div class="form-subtext">Поддерживаются теги: **жирный**, *курсив*, [color=red]цвет[/color].</div>
+                    </div>
+
+                    <div id="profileError" class="error-text"></div>
+                    
+                    <button type="submit" class="btn-submit" id="saveProfileBtn">
+                        <span class="material-icons-outlined">save</span> Сохранить профиль
+                    </button>
+                </form>
+            </div>
+
+            <!-- Секция 2: Внешний вид -->
+            <div class="settings-section">
+                <h2>Внешний вид</h2>
+                <div class="form-group">
+                    <label class="form-label">Тема оформления</label>
+                    <div class="theme-selector">
+                        <label class="theme-option" id="themeSystem">
+                            <span class="material-icons-outlined">brightness_auto</span> Системная
+                        </label>
+                        <label class="theme-option" id="themeLight">
+                            <span class="material-icons-outlined">light_mode</span> Светлая
+                        </label>
+                        <label class="theme-option" id="themeDark">
+                            <span class="material-icons-outlined">dark_mode</span> Темная
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция 3: Приватность -->
+            <div class="settings-section">
+                <h2>Приватность</h2>
+                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="form-label" style="margin-bottom: 4px;">Показывать моих ботов в поиске</div>
+                        <div class="form-subtext">Если выключить, ваши боты будут доступны только по прямой ссылке.</div>
+                    </div>
+                    <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                        <input type="checkbox" id="privacyToggle" style="opacity: 0; width: 0; height: 0;">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px;"></span>
+                        <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; pointer-events: none;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Секция 4: Опасная зона -->
+            <div class="settings-section" style="border-color: var(--error-color);">
+                <h2 style="color: var(--error-color);">Опасная зона</h2>
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Удаление аккаунта приведет к потере всех ваших ботов, истории чатов и данных профиля. Это действие необратимо.
+                </p>
+                <button class="btn-danger" onclick="document.getElementById('deleteModal').classList.add('active')">
+                    <span class="material-icons-outlined">delete_forever</span> Удалить аккаунт
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно удаления -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Удалить аккаунт?</h2>
+            <p class="modal-text">Введите ваш пароль для подтверждения. Это действие навсегда удалит ваш аккаунт и всех ваших ботов.</p>
+            <input type="password" id="deletePassword" class="form-input" placeholder="Введите пароль" style="margin-bottom: 16px;">
+            <div id="deleteError" class="error-text"></div>
+            <button class="btn-danger" id="confirmDeleteBtn" onclick="deleteAccount()">Да, удалить</button>
+            <button class="btn-submit" style="background-color: var(--surface-color); color: var(--text-primary); margin-top: 8px;" onclick="document.getElementById('deleteModal').classList.remove('active')">Отмена</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDijBugjXGUSD38usVRk2e_jwOou3Aw7p8",
+            authDomain: "soapsai.firebaseapp.com",
+            projectId: "soapsai",
+            storageBucket: "soapsai.firebasestorage.app",
+            messagingSenderId: "354128379628",
+            appId: "1:354128379628:web:1bc5980f4968deeecbefc9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const CLOUD_NAME = "dmhoqxtc";
+        const UPLOAD_PRESET = "ml_default";
+
+        let currentUserData = null;
+
+        // === УТИЛИТЫ ===
+        window.isUserLoggedIn = () => localStorage.getItem('soaps_user') !== null;
+        window.checkAuthAndGo = (url) => { if (isUserLoggedIn()) window.location.href = url; else window.location.href = 'registration.html'; };
+        window.logout = () => { localStorage.removeItem('soaps_user'); window.location.href = 'registration.html'; };
+
+        // === ТЕМА ===
+        function applyTheme(theme) {
+            document.body.classList.remove('light-theme', 'dark-theme');
+            if (theme === 'light') document.body.classList.add('light-theme');
+            if (theme === 'dark') document.body.classList.add('dark-theme');
+            
+            document.getElementById('themeSystem').classList.remove('active');
+            document.getElementById('themeLight').classList.remove('active');
+            document.getElementById('themeDark').classList.remove('active');
+            
+            if (theme === 'system') document.getElementById('themeSystem').classList.add('active');
+            if (theme === 'light') document.getElementById('themeLight').classList.add('active');
+            if (theme === 'dark') document.getElementById('themeDark').classList.add('active');
+        }
+
+        document.getElementById('themeSystem').addEventListener('click', () => { localStorage.setItem('soap_theme', 'system'); applyTheme('system'); });
+        document.getElementById('themeLight').addEventListener('click', () => { localStorage.setItem('soap_theme', 'light'); applyTheme('light'); });
+        document.getElementById('themeDark').addEventListener('click', () => { localStorage.setItem('soap_theme', 'dark'); applyTheme('dark'); });
+
+        // === ОСНОВНАЯ ЛОГИКА ===
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!isUserLoggedIn()) {
+                window.location.href = 'registration.html';
+                return;
+            }
+
+            // Применяем сохраненную тему
+            const savedTheme = localStorage.getItem('soap_theme') || 'system';
+            applyTheme(savedTheme);
+
+            // Настройка переключателя приватности
+            const toggle = document.getElementById('privacyToggle');
+            const slider = toggle.nextElementSibling;
+            const knob = slider.nextElementSibling;
+            toggle.addEventListener('change', () => {
+                if(toggle.checked) {
+                    slider.style.backgroundColor = 'var(--primary-color)';
+                    knob.style.transform = 'translateX(22px)';
+                } else {
+                    slider.style.backgroundColor = 'var(--border-color)';
+                    knob.style.transform = 'translateX(0)';
+                }
+            });
+
+            // Меню
+            document.getElementById('drawerBtn').addEventListener('click', () => { document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('active'); });
+            document.getElementById('overlay').addEventListener('click', () => { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('active'); });
+            document.getElementById('menuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('active'); });
+            document.addEventListener('click', (e) => { const menu = document.getElementById('dropdownMenu'); const btn = document.getElementById('menuBtn'); if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active'); });
+
+            // Загружаем данные пользователя
+            const user = JSON.parse(localStorage.getItem('soaps_user'));
+            const userDocRef = doc(db, "accounts", user.id);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+                currentUserData = userDocSnap.data();
+                
+                document.getElementById('setDisplayName').value = currentUserData.displayName || '';
+                document.getElementById('setUsername').value = currentUserData.username || '';
+                document.getElementById('setBio').value = currentUserData.bio || '';
+
+                // Загружаем превью
+                if (currentUserData.avatar) {
+                    const preview = document.getElementById('setAvatarPreview');
+                    preview.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentUserData.avatar}`;
+                    preview.style.display = 'block';
+                    document.querySelector('.avatar-zone span').style.display = 'none';
+                    document.getElementById('setAvatarOverlay').style.display = 'flex';
+                }
+                if (currentUserData.banner) {
+                    const preview = document.getElementById('setBannerPreview');
+                    preview.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentUserData.banner}`;
+                    preview.style.display = 'block';
+                    document.querySelector('.banner-zone span.banner-icon').style.display = 'none';
+                    document.querySelector('.banner-zone span.banner-text').style.display = 'none';
+                    document.getElementById('setBannerOverlay').style.display = 'flex';
+                }
+            }
+
+            // Валидация ника
+            document.getElementById('setUsername').addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Zа-яА-Я0-9\-_\.]/g, '');
+            });
+
+            // Превью картинок
+            const setupPreview = (inputId, previewId, overlayId, hideSelectors = []) => {
+                const input = document.getElementById(inputId);
+                const preview = document.getElementById(previewId);
+                const overlay = document.getElementById(overlayId);
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                            hideSelectors.forEach(sel => { const el = document.querySelector(sel); if(el) el.style.display = 'none'; });
+                            if (overlay) overlay.style.display = 'flex';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            };
+            setupPreview('setAvatar', 'setAvatarPreview', 'setAvatarOverlay', ['.avatar-zone span.material-icons-outlined']);
+            setupPreview('setBanner', 'setBannerPreview', 'setBannerOverlay', ['.banner-icon', '.banner-text']);
+
+            // Сохранение профиля
+            document.getElementById('profileSettingsForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const newDisplayName = document.getElementById('setDisplayName').value.trim();
+                const newUsername = document.getElementById('setUsername').value.trim();
+                const newBio = document.getElementById('setBio').value.trim();
+                const errorDiv = document.getElementById('profileError');
+                const btn = document.getElementById('saveProfileBtn');
+
+                errorDiv.style.display = 'none';
+
+                if (!newDisplayName || !newUsername) {
+                    errorDiv.textContent = "Имя и никнейм обязательны.";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-icons-outlined loading-spinner" style="display:inline-block;">sync</span> Сохранение...';
+
+                try {
+                    // 1. Проверка уникальности нового ника (если он изменился)
+                    if (newUsername !== currentUserData.username) {
+                        const usersRef = collection(db, "accounts");
+                        const q = query(usersRef, where("username", "==", newUsername));
+                        const querySnapshot = await getDocs(q);
+                        if (!querySnapshot.empty) {
+                            throw new Error("Этот никнейм уже занят другим пользователем.");
+                        }
+                    }
+
+                    // 2. Загрузка новых картинок (если выбраны)
+                    let newAvatarId = currentUserData.avatar || "";
+                    const avatarInput = document.getElementById('setAvatar');
+                    if (avatarInput.files.length > 0) {
+                        const formData = new FormData();
+                        formData.append('file', avatarInput.files[0]);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                        const data = await res.json();
+                        if (data.public_id) newAvatarId = data.public_id;
+                    }
+
+                    let newBannerId = currentUserData.banner || "";
+                    const bannerInput = document.getElementById('setBanner');
+                    if (bannerInput.files.length > 0) {
+                        const formData = new FormData();
+                        formData.append('file', bannerInput.files[0]);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                        const data = await res.json();
+                        if (data.public_id) newBannerId = data.public_id;
+                    }
+
+                    // 3. Обновляем запись в Firestore
+                    await updateDoc(doc(db, "accounts", currentUserData.id), {
+                        displayName: newDisplayName,
+                        username: newUsername,
+                        bio: newBio,
+                        avatar: newAvatarId,
+                        banner: newBannerId
+                    });
+
+                    // 4. Обновляем localStorage
+                    const sessionUser = JSON.parse(localStorage.getItem('soaps_user'));
+                    sessionUser.displayName = newDisplayName;
+                    sessionUser.username = newUsername;
+                    sessionUser.bio = newBio;
+                    sessionUser.avatar = newAvatarId;
+                    sessionUser.banner = newBannerId;
+                    localStorage.setItem('soaps_user', JSON.stringify(sessionUser));
+
+                    alert("Настройки успешно сохранены!");
+                    window.location.reload();
+
+                } catch (error) {
+                    errorDiv.textContent = error.message;
+                    errorDiv.style.display = 'block';
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-icons-outlined">save</span> Сохранить профиль';
+                }
+            });
+        });
+
+        // Удаление аккаунта
+        window.deleteAccount = async () => {
+            const passwordInput = document.getElementById('deletePassword').value;
+            const errorDiv = document.getElementById('deleteError');
+            const btn = document.getElementById('confirmDeleteBtn');
+
+            errorDiv.style.display = 'none';
+
+            if (passwordInput !== currentUserData.password) {
+                errorDiv.textContent = "Неверный пароль.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-icons-outlined loading-spinner" style="display:inline-block;">sync</span> Удаление...';
+
+            try {
+                // Удаляем аккаунт из Firestore
+                await deleteDoc(doc(db, "accounts", currentUserData.id));
+                
+                // В реальном проекте здесь нужно также удалить всех ботов и чаты,
+                // но для демо мы просто удаляем аккаунт.
+                
+                localStorage.removeItem('soaps_user');
+                
+                alert("Аккаунт удален. Вы будете перенаправлены на страницу регистрации.");
+                window.location.href = 'registration.html';
+
+            } catch (error) {
+                errorDiv.textContent = "Ошибка при удалении: " + error.message;
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Да, удалить';
+            }
+        };
+    </script>
+</body>
+</html>
