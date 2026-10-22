@@ -24,19 +24,16 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text-primary); transition: background-color 0.3s; padding-bottom: 60px; overflow-x: hidden; }
         
-        /* Шапка сайта */
         header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background-color: var(--header-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
         .header-left { display: flex; align-items: center; gap: 12px; }
         .logo-container img { height: 32px; border-radius: 4px; }
         .menu-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .menu-btn:hover { background-color: var(--hover-bg); }
         
-        /* Поиск */
         .search-bar-container { flex-grow: 1; margin: 0 16px; display: flex; justify-content: center; max-width: 600px; }
         .search-input-wrapper { display: flex; align-items: center; background-color: var(--surface-color); border-radius: 24px; padding: 8px 16px; width: 100%; border: 1px solid var(--border-color); }
         .search-input-wrapper input { background: none; border: none; color: var(--text-primary); outline: none; font-size: 14px; width: 100%; }
         
-        /* Боковое меню */
         .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; padding: 16px 0; display: flex; flex-direction: column; }
         .drawer.open { left: 0; }
         .drawer-header { padding: 0 16px 16px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
@@ -46,24 +43,17 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .overlay.active { display: block; }
         
-        /* Выпадающее меню 3 точки */
         .dropdown-menu { position: absolute; top: 60px; right: 16px; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 200px; z-index: 101; }
         .dropdown-menu.active { display: flex; }
         .dropdown-menu a { padding: 12px 16px; text-decoration: none; color: var(--text-primary); font-size: 14px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
         .dropdown-menu a:hover { background-color: var(--hover-bg); }
 
-        /* Основной контейнер */
         #app { max-width: 800px; margin: 0 auto; padding: 16px; }
 
-        /* --- ПРОФИЛЬ --- */
         .profile-header { position: relative; border-radius: 12px; overflow: hidden; background-color: var(--surface-color); border: 1px solid var(--border-color); margin-bottom: 24px; }
-        
         .profile-banner { width: 100%; height: 200px; object-fit: cover; background-color: var(--border-color); display: block; }
-        
         .profile-info-container { padding: 0 24px 24px 24px; position: relative; }
-        
         .profile-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--bg-color); object-fit: cover; background-color: var(--surface-color); position: absolute; top: -60px; left: 24px; z-index: 2; }
-        
         .profile-actions { display: flex; justify-content: flex-end; margin-top: 12px; height: 48px; }
         .btn-edit { background-color: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; }
         .btn-edit:hover { background-color: var(--hover-bg); }
@@ -76,7 +66,6 @@
         .profile-stats { display: flex; gap: 20px; font-size: 14px; color: var(--text-secondary); }
         .profile-stats strong { color: var(--text-primary); font-size: 16px; }
         
-        /* Список ботов */
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
         .bot-grid { display: flex; flex-direction: column; gap: 8px; }
         
@@ -89,8 +78,26 @@
         
         .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 14px; }
         
-        /* Загрузка */
+        /* Загрузка и Ошибка */
         #loading { display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 18px; color: var(--text-secondary); position: fixed; width: 100%; background: var(--bg-color); z-index: 9999; transition: opacity 0.3s; }
+        
+        #error-screen { 
+            display: none; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100vh; padding: 20px; text-align: center; background: var(--bg-color); 
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 10000;
+        }
+        #error-screen h2 { color: var(--error-color); margin-bottom: 16px; }
+        #error-screen textarea {
+            width: 100%; max-width: 500px; height: 150px; padding: 12px; border-radius: 8px;
+            background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color);
+            font-family: monospace; font-size: 12px; margin-bottom: 16px; resize: vertical;
+        }
+        .error-btns { display: flex; gap: 12px; }
+        .error-btn {
+            padding: 10px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none;
+            background: var(--primary-color); color: var(--bg-color); font-weight: 500;
+        }
+        .error-btn.secondary { background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -100,7 +107,6 @@
     <div id="main-app" class="hidden" style="display:none;">
         <div class="overlay" id="overlay"></div>
 
-        <!-- Меню -->
         <div class="drawer" id="drawer">
             <div class="drawer-header">
                 <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Logo" style="height: 24px;">
@@ -157,6 +163,20 @@
         </main>
     </div>
 
+    <!-- Экран ошибки с возможностью скопировать -->
+    <div id="error-screen">
+        <h2>Произошла ошибка</h2>
+        <p style="margin-bottom: 16px; color: var(--text-secondary); max-width: 500px;">
+            Не удалось загрузить профиль. Скопируйте текст ошибки ниже и отправьте разработчику.
+        </p>
+        <textarea id="error-details" readonly></textarea>
+        <div class="error-btns">
+            <button class="error-btn" onclick="copyError()">Скопировать</button>
+            <button class="error-btn secondary" onclick="window.location.reload()">Обновить</button>
+            <button class="error-btn secondary" onclick="window.location.href='index.html'">На главную</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -172,23 +192,36 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         const CLOUD_NAME = "dmhoqxtc";
 
-        // === УТИЛИТЫ ===
+        // Глобальная функция для показа ошибки
+        window.showError = (message) => {
+            console.error(message);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('main-app').style.display = 'none';
+            const errScreen = document.getElementById('error-screen');
+            errScreen.style.display = 'flex';
+            document.getElementById('error-details').value = message;
+        };
+
+        window.copyError = () => {
+            const txt = document.getElementById('error-details');
+            txt.select();
+            document.execCommand('copy');
+            alert('Текст ошибки скопирован!');
+        };
+
+        // Утилиты
         window.isUserLoggedIn = () => localStorage.getItem('soaps_user') !== null;
-        
         window.checkAuthAndGo = (url) => {
             if (isUserLoggedIn()) window.location.href = url;
             else window.location.href = 'registration.html';
         };
-
         window.logout = () => {
             localStorage.removeItem('soaps_user');
             window.location.href = 'registration.html';
         };
 
-        // Парсер BBCode
         function parseBBCode(text) {
             if (!text) return "";
             let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -212,90 +245,74 @@
             return safeText;
         }
 
-        // === ОСНОВНАЯ ЛОГИКА ===
-        document.addEventListener('DOMContentLoaded', () => {
-            // Проверка авторизации
-            if (!isUserLoggedIn()) {
-                window.location.href = 'registration.html';
-                return;
-            }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetProfileId = urlParams.get('id');
-
-            // ГЛАВНОЕ ИСПРАВЛЕНИЕ: Если в URL нет id — редирект на свой профиль
-            if (!targetProfileId) {
-                const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
-                window.location.replace(`profile.html?id=${currentUser.username}`);
-                return;
-            }
-
-            // Показываем интерфейс
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('main-app').style.display = 'block';
-
-            // UI Меню
-            document.getElementById('drawerBtn').addEventListener('click', () => {
-                document.getElementById('drawer').classList.add('open');
-                document.getElementById('overlay').classList.add('active');
-            });
-            document.getElementById('overlay').addEventListener('click', () => {
-                document.getElementById('drawer').classList.remove('open');
-                document.getElementById('overlay').classList.remove('active');
-            });
-            document.getElementById('menuBtn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.getElementById('dropdownMenu').classList.toggle('active');
-            });
-            document.addEventListener('click', (e) => {
-                const menu = document.getElementById('dropdownMenu');
-                const btn = document.getElementById('menuBtn');
-                if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
-            });
-
-            // Запускаем асинхронную загрузку данных
-            loadProfileData(targetProfileId);
-        });
-
-        async function loadProfileData(targetProfileId) {
-            const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
-            let profileUserId = currentUser.id;
-            let isOwnProfile = true;
-
-            // Ищем пользователя по username или ID
-            const usersRef = collection(db, "accounts");
-            const qUsername = query(usersRef, where("username", "==", targetProfileId));
-            const snapUsername = await getDocs(qUsername);
-            
-            if (!snapUsername.empty) {
-                profileUserId = snapUsername.docs[0].id;
-                if (profileUserId !== currentUser.id) isOwnProfile = false;
-            } else {
-                // Пробуем по ID документа
-                const docRef = doc(db, "accounts", targetProfileId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    profileUserId = docSnap.id;
-                    if (profileUserId !== currentUser.id) isOwnProfile = false;
-                } else {
-                    document.getElementById('profile-content').innerHTML = `<div class="empty-state">Пользователь не найден.</div>`;
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                if (!isUserLoggedIn()) {
+                    window.location.href = 'registration.html';
                     return;
                 }
-            }
 
-            // Загружаем данные профиля
-            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const targetProfileId = urlParams.get('id');
+
+                // Если нет ID — редирект на свой профиль с ником
+                if (!targetProfileId) {
+                    const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
+                    window.location.replace(`profile.html?id=${currentUser.username}`);
+                    return;
+                }
+
+                // Подготовка UI
+                document.getElementById('drawerBtn').addEventListener('click', () => {
+                    document.getElementById('drawer').classList.add('open');
+                    document.getElementById('overlay').classList.add('active');
+                });
+                document.getElementById('overlay').addEventListener('click', () => {
+                    document.getElementById('drawer').classList.remove('open');
+                    document.getElementById('overlay').classList.remove('active');
+                });
+                document.getElementById('menuBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.getElementById('dropdownMenu').classList.toggle('active');
+                });
+                document.addEventListener('click', (e) => {
+                    const menu = document.getElementById('dropdownMenu');
+                    const btn = document.getElementById('menuBtn');
+                    if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
+                });
+
+                // --- ЗАГРУЗКА ДАННЫХ ---
+                const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
+                let profileUserId = currentUser.id;
+                let isOwnProfile = true;
+
+                const usersRef = collection(db, "accounts");
+                const qUsername = query(usersRef, where("username", "==", targetProfileId));
+                const snapUsername = await getDocs(qUsername);
+                
+                if (!snapUsername.empty) {
+                    profileUserId = snapUsername.docs[0].id;
+                    if (profileUserId !== currentUser.id) isOwnProfile = false;
+                } else {
+                    const docRef = doc(db, "accounts", targetProfileId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        profileUserId = docSnap.id;
+                        if (profileUserId !== currentUser.id) isOwnProfile = false;
+                    } else {
+                        throw new Error("Пользователь не найден в базе данных.");
+                    }
+                }
+
                 const userDocRef = doc(db, "accounts", profileUserId);
                 const userDocSnap = await getDoc(userDocRef);
                 
                 if (!userDocSnap.exists()) {
-                    document.getElementById('profile-content').innerHTML = `<div class="empty-state">Пользователь не найден.</div>`;
-                    return;
+                    throw new Error("Документ пользователя не существует.");
                 }
 
                 const userData = userDocSnap.data();
                 
-                // Формируем ссылки на картинки
                 let avatarUrl = "https://i.ibb.co/B2gVk6pX/icon.png";
                 if (userData.avatar) {
                     avatarUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${userData.avatar}`;
@@ -306,7 +323,6 @@
                     bannerUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${userData.banner}`;
                 }
 
-                // Загружаем ботов этого пользователя
                 const botsRef = collection(db, "bots");
                 const qBots = query(botsRef, where("authorId", "==", profileUserId));
                 const botsSnapshot = await getDocs(qBots);
@@ -319,8 +335,6 @@
                 botsSnapshot.forEach(botDoc => {
                     const bot = botDoc.data();
                     const botId = botDoc.id;
-                    
-                    // Логика приватности: если смотрим чужой профиль, показываем только public
                     const isBotPublic = bot.privacy === 'public';
                     
                     if (isOwnProfile || isBotPublic) {
@@ -353,7 +367,6 @@
                     botsHtml = `<div class="empty-state">У этого пользователя пока нет доступных ботов.</div>`;
                 }
 
-                // Рендерим страницу
                 const content = document.getElementById('profile-content');
                 content.innerHTML = `
                     <div class="profile-header">
@@ -393,11 +406,15 @@
                     </div>
                 `;
 
+                // Показываем интерфейс
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+
             } catch (error) {
-                console.error("Ошибка загрузки профиля:", error);
-                document.getElementById('profile-content').innerHTML = `<div class="empty-state" style="color:red;">Ошибка загрузки данных. Попробуйте позже.</div>`;
+                console.error("Критическая ошибка профиля:", error);
+                window.showError(error.message + "\n\n" + error.stack);
             }
-        }
+        });
     </script>
 </body>
 </html>
