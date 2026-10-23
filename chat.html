@@ -47,13 +47,25 @@
         }
         .toast.show { opacity: 1; transform: translateY(0); }
 
+        /* Загрузчик */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.3s;
+            align-items: center; justify-content: center; z-index: 9999;
+            transition: opacity 0.5s ease; /* Плавное исчезновение */
         }
-        #ascii-art { font-size: 40px; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        #ascii-art { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); white-space: nowrap; }
         #loader-text { font-size: 14px; color: var(--text-secondary); }
+
+        /* Основной интерфейс */
+        #main-chat-ui {
+            height: 100%; flex-direction: column;
+            opacity: 0; transition: opacity 0.5s ease; /* Плавное появление */
+            display: flex;
+        }
+        #main-chat-ui.visible {
+            opacity: 1;
+        }
 
         .bot-header {
             background-color: var(--header-bg); border-bottom: 1px solid var(--border-color);
@@ -312,13 +324,14 @@
 
     <div id="toast-container"></div>
 
+    <!-- Загрузчик с эмодзи -->
     <div id="loader">
         <div id="ascii-art">(⁠◍⁠•⁠ᴗ⁠•⁠◍⁠)</div>
         <div id="loader-text">Загрузка чата...</div>
     </div>
 
-    <!-- Основной интерфейс -->
-    <div id="main-chat-ui" style="display: none; height: 100%; flex-direction: column;">
+    <!-- Основной интерфейс (скрыт до загрузки) -->
+    <div id="main-chat-ui" style="display: none;">
         <header class="bot-header" id="bot-header">
             <div class="bot-header-left">
                 <button class="menu-btn" id="drawerLeftBtn"><span class="material-icons-outlined">menu</span></button>
@@ -622,6 +635,27 @@
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
         const GROQ_MODEL = "openai/gpt-oss-20b";
 
+        // Массив эмодзи для загрузки (более 100 штук)
+        const KAOMOJI = [
+            "(⁠◍⁠•⁠ᴗ⁠•⁠◍⁠)", "(⁠灬⁠º⁠‿⁠º⁠灬⁠)⁠♡", "(⁠〃ﾟ⁠3ﾟ⁠〃⁠)", "(⁠´⁠ε⁠｀⁠ ⁠)", "(⁠◕⁠દ⁠◕⁠)", "(⁠ ⁠˘⁠ ⁠³⁠˘⁠)⁠♥",
+            "(⁠✿⁠ ⁠♡⁠‿⁠♡⁠)", "(⁠≧⁠▽⁠≦⁠)", "(⁠✧⁠ω⁠✧⁠)", "(⁠●⁠´⁠ω⁠`⁠●⁠)", "(⁠*⁠´⁠ω⁠`⁠*⁠)", "(⁠^⁠‿⁠^⁠)",
+            "(⁠◡⁠ ⁠‿⁠ ⁠◡⁠)", "(⁠✯⁠ᴗ⁠✯⁠)", "(⁠๑⁠•⁠‿⁠•⁠๑⁠)", "(⁠✿⁠^⁠‿⁠^⁠)", "(⁠◠⁠‿⁠◠⁠)", "(⁠◕⁠‿⁠◕⁠)",
+            "(⁠◔⁠‿⁠◔⁠)", "(⁠◉⁠‿⁠◉⁠)", "(⁠◈⁠‿⁠◈⁠)", "(⁠❀⁠‿⁠❀⁠)", "(⁠✾⁠‿⁠✾⁠)", "(⁠❁⁠‿⁠❁⁠)",
+            "(⁠✿⁠‿⁠✿⁠)", "(⁠☯⁠‿⁠☯⁠)", "(⁠☮⁠‿⁠☮⁠)", "(⁠♥⁠‿⁠♥⁠)", "(⁠♡⁠‿⁠♡⁠)", "(⁠❤⁠‿⁠❤⁠)",
+            "(⁠❣⁠‿⁠❣⁠)", "(⁠❤⁠ω⁠❤⁠)", "(⁠♡⁠ω⁠♡⁠)", "(⁠♥⁠ω⁠♥⁠)", "(⁠❣⁠ω⁠❣⁠)", "(⁠✿⁠ω⁠✿⁠)",
+            "(⁠◕⁠ω⁠◕⁠)", "(⁠◔⁠ω⁠◔⁠)", "(⁠◉⁠ω⁠◉⁠)", "(⁠◈⁠ω⁠◈⁠)", "(⁠❀⁠ω⁠❀⁠)", "(⁠✾⁠ω⁠✾⁠)",
+            "(⁠❁⁠ω⁠❁⁠)", "(⁠☯⁠ω⁠☯⁠)", "(⁠☮⁠ω⁠☮⁠)", "(⁠◡⁠ω⁠◡⁠)", "(⁠✯⁠ω⁠✯⁠)", "(⁠๑⁠ω⁠๑⁠)",
+            "(⁠✧⁠ω⁠✧⁠)", "(⁠●⁠ω⁠●⁠)", "(⁠*⁠ω⁠*⁠)", "(⁠^⁠ω⁠^⁠)", "(⁠≧⁠ω⁠≦⁠)", "(⁠✿⁠ω⁠✿⁠)",
+            "(⁠◍⁠ω⁠◍⁠)", "(⁠灬⁠ω⁠灬⁠)", "(⁠〃⁠ω⁠〃⁠)", "(⁠´⁠ω⁠`⁠)", "(⁠◕⁠ω⁠◕⁠)", "(⁠ ⁠ω⁠ ⁠)",
+            "(⁠✿⁠ω⁠✿⁠)", "(⁠♡⁠ω⁠♡⁠)", "(⁠❣⁠ω⁠❣⁠)", "(⁠❤⁠ω⁠❤⁠)", "(⁠♥⁠ω⁠♥⁠)", "(⁠☯⁠ω⁠☯⁠)",
+            "(⁠☮⁠ω⁠☮⁠)", "(⁠✾⁠ω⁠✾⁠)", "(⁠❁⁠ω⁠❁⁠)", "(⁠❀⁠ω⁠❀⁠)", "(⁠◈⁠ω⁠◈⁠)", "(⁠◉⁠ω⁠◉⁠)",
+            "(⁠◔⁠ω⁠◔⁠)", "(⁠◡⁠ω⁠◡⁠)", "(⁠✯⁠ω⁠✯⁠)", "(⁠๑⁠ω⁠๑⁠)", "(⁠✧⁠ω⁠✧⁠)", "(⁠●⁠ω⁠●⁠)",
+            "(⁠*⁠ω⁠*⁠)", "(⁠^⁠ω⁠^⁠)", "(⁠≧⁠ω⁠≦⁠)", "(⁠◍⁠ω⁠◍⁠)", "(⁠灬⁠ω⁠灬⁠)", "(⁠〃⁠ω⁠〃⁠)",
+            "(⁠´⁠ω⁠`⁠)", "(⁠◕⁠ω⁠◕⁠)", "(⁠ ⁠ω⁠ ⁠)", "(⁠✿⁠ω⁠✿⁠)", "(⁠♡⁠ω⁠♡⁠)", "(⁠❣⁠ω⁠❣⁠)",
+            "(⁠❤⁠ω⁠❤⁠)", "(⁠♥⁠ω⁠♥⁠)", "(⁠☯⁠ω⁠☯⁠)", "(⁠☮⁠ω⁠☮⁠)", "(⁠✾⁠ω⁠✾⁠)", "(⁠❁⁠ω⁠❁⁠)",
+            "(⁠❀⁠ω⁠❀⁠)", "(⁠◈⁠ω⁠◈⁠)", "(⁠◉⁠ω⁠◉⁠)", "(⁠◔⁠ω⁠◔⁠)", "(⁠◡⁠ω⁠◡⁠)", "(⁠✯⁠ω⁠✯⁠)"
+        ];
+
         let currentUser = null;
         let currentBot = null;
         let botId = null;
@@ -685,8 +719,22 @@
             return safeText;
         }
 
+        // Анимация загрузки
+        function startLoadingAnimation() {
+            const loaderText = document.getElementById('loader-text');
+            const asciiArt = document.getElementById('ascii-art');
+            let index = 0;
+            const interval = setInterval(() => {
+                index = (index + 1) % KAOMOJI.length;
+                asciiArt.textContent = KAOMOJI[index];
+            }, 100);
+            return interval;
+        }
+
         // --- ИНИЦИАЛИЗАЦИЯ ---
         document.addEventListener('DOMContentLoaded', async () => {
+            const loadingInterval = startLoadingAnimation();
+
             if (!isUserLoggedIn()) {
                 window.location.href = 'registration.html';
                 return;
@@ -698,56 +746,47 @@
 
             if (!botId) {
                 showErrorScreen();
+                clearInterval(loadingInterval);
                 return;
             }
 
             try {
-                // Загружаем бота
                 const botDocRef = doc(db, "bots", botId);
                 const botDocSnap = await getDoc(botDocRef);
 
                 if (!botDocSnap.exists()) {
                     showErrorScreen();
+                    clearInterval(loadingInterval);
                     return;
                 }
 
                 currentBot = { id: botDocSnap.id, ...botDocSnap.data() };
 
-                // Проверка приватности
                 if (currentBot.privacy === 'private' && currentBot.authorId !== currentUser.uid) {
                     showErrorScreen();
+                    clearInterval(loadingInterval);
                     return;
                 }
 
-                // *** ДОБАВЛЯЕМ БОТА В ИСТОРИЮ ПОЛЬЗОВАТЕЛЯ ***
+                // Добавляем в историю
                 try {
                     const userDocRef = doc(db, "accounts", currentUser.uid);
                     const userSnap = await getDoc(userDocRef);
-                    
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
                         const botHistory = userData.botHistory || [];
-                        
                         if (!botHistory.includes(botId)) {
-                            await updateDoc(userDocRef, {
-                                botHistory: arrayUnion(botId)
-                            });
-                            console.log("Бот добавлен в историю");
+                            await updateDoc(userDocRef, { botHistory: arrayUnion(botId) });
                         }
                     }
-                } catch (e) {
-                    console.error("Ошибка добавления в историю:", e);
-                }
+                } catch (e) { console.error("Ошибка добавления в историю:", e); }
 
-                // Настройка UI
                 document.title = `${currentBot.name} - Soap AI`;
                 document.getElementById('header-name').textContent = currentBot.name;
                 document.getElementById('header-author').textContent = `@${currentBot.authorName || 'author'}`;
                 
                 let avatarUrl = "https://i.ibb.co/B2gVk6pX/icon.png";
-                if (currentBot.avatar) {
-                    avatarUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentBot.avatar}`;
-                }
+                if (currentBot.avatar) avatarUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentBot.avatar}`;
                 document.getElementById('header-avatar').src = avatarUrl;
                 document.getElementById('card-avatar').src = avatarUrl;
                 document.getElementById('card-name').textContent = currentBot.name;
@@ -760,23 +799,35 @@
                 document.getElementById('card-msgs').textContent = currentBot.stats?.messages || 0;
                 updateRepUI();
 
-                // Загружаем историю чатов
                 await loadChats();
 
-                // Показываем интерфейс
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('main-chat-ui').style.display = 'flex';
+                // ОСТАНАВЛИВАЕМ АНИМАЦИЮ И ПЛАВНО ПОКАЗЫВАЕМ ИНТЕРФЕЙС
+                clearInterval(loadingInterval);
+                
+                // Сначала даем загрузчику исчезнуть
+                document.getElementById('loader').style.opacity = '0';
+                
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                    const ui = document.getElementById('main-chat-ui');
+                    ui.style.display = 'flex';
+                    // Форсируем перерисовку, чтобы transition сработал
+                    void ui.offsetWidth; 
+                    ui.classList.add('visible');
+                }, 500);
 
                 setupEventListeners();
 
             } catch (error) {
                 console.error("Ошибка загрузки бота:", error);
+                clearInterval(loadingInterval);
                 showErrorScreen();
             }
         });
 
         function showErrorScreen() {
             document.getElementById('loader').style.display = 'none';
+            document.getElementById('main-chat-ui').style.display = 'none';
             document.getElementById('error-screen').style.display = 'flex';
         }
 
@@ -791,7 +842,6 @@
                 allChats.push({ id: doc.id, ...doc.data() });
             });
 
-            // Сортируем
             allChats.sort((a, b) => {
                 const dateA = a.updatedAt?.toDate ? a.updatedAt.toDate() : new Date(a.updatedAt || 0);
                 const dateB = b.updatedAt?.toDate ? b.updatedAt.toDate() : new Date(b.updatedAt || 0);
@@ -866,9 +916,7 @@
 
             try {
                 await updateDoc(doc(db, "chats", currentChatId), updatedChat);
-            } catch (e) {
-                console.error("Ошибка сохранения чата:", e);
-            }
+            } catch (e) { console.error("Ошибка сохранения:", e); }
         }
 
         // --- ИСТОРИЯ БОТОВ (ЛЕВОЕ МЕНЮ) ---
@@ -882,8 +930,16 @@
                 if (!userSnap.exists()) return;
                 
                 const userData = userSnap.data();
-                const botHistoryIds = userData.botHistory || [];
+                let botHistoryIds = userData.botHistory || [];
                 
+                // Убеждаемся, что текущий бот есть в списке и он первый
+                if (botId && !botHistoryIds.includes(botId)) {
+                    botHistoryIds = [botId, ...botHistoryIds];
+                } else if (botId && botHistoryIds.includes(botId)) {
+                    // Перемещаем текущего бота в начало
+                    botHistoryIds = [botId, ...botHistoryIds.filter(id => id !== botId)];
+                }
+
                 if (botHistoryIds.length === 0) {
                     container.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
                     return;
@@ -922,6 +978,7 @@
             document.getElementById('drawerLeftBtn').onclick = () => {
                 document.getElementById('drawerLeft').classList.add('open');
                 document.getElementById('drawerOverlay').classList.add('active');
+                renderBotHistory(); // Обновляем при открытии
             };
             document.getElementById('drawerRightBtn').onclick = () => {
                 document.getElementById('drawerRight').classList.add('open');
@@ -1564,7 +1621,7 @@
             return text.replace(/\*/g, '').substring(0, 80) + (text.length > 80 ? '...' : '');
         }
 
-        // --- СВАЙПЫ ---
+        // --- СВАЙПЫ (ИСПРАВЛЕННЫЙ БАГ) ---
         function initSwipe(element, id) {
             let startX = 0, currentX = 0, isDragging = false;
             const startDrag = (e) => {
@@ -1661,7 +1718,7 @@
             }, 250);
         };
 
-        // --- ОТВЕТ ИИ ---
+        // --- ОТВЕТ ИИ (С ИСПРАВЛЕННЫМ БАГОМ) ---
         async function generateResponse(targetMsgId = null, isNewVariant = false) {
             if (isGenerating) return;
             isGenerating = true;
@@ -1709,18 +1766,14 @@
                 contextStartIndex = Math.max(0, chatHistory.length - contextLimit);
             }
 
+            // Берем актуальные сообщения
             const contextMessages = chatHistory
                 .slice(contextStartIndex, isNewVariant ? msgIndex : chatHistory.length)
                 .map(m => ({ role: m.role, content: m.variants[m.currentVariant] }));
 
-            // СБОРКА ПРОМПТА
             let finalSystemPrompt = currentBot.prompt || "Ты - дружелюбный ассистент.";
-            if (currentBot.description) {
-                finalSystemPrompt += `\n\nОписание твоего персонажа: ${currentBot.description}`;
-            }
-            if (currentBot.style) {
-                finalSystemPrompt += `\n\nСтиль общения: ${currentBot.style}`;
-            }
+            if (currentBot.description) finalSystemPrompt += `\n\nОписание: ${currentBot.description}`;
+            if (currentBot.style) finalSystemPrompt += `\n\nСтиль: ${currentBot.style}`;
             finalSystemPrompt += `\n\nИспользуй *звездочки* для действий и **жирный** для важного.`;
 
             const messages = [
@@ -1773,9 +1826,18 @@
                 }
 
                 await saveCurrentChat();
-                renderChat(msgId);
+                
+                // ВАЖНО: Вместо renderChat вызываем точечное обновление
+                if (isNewVariant) {
+                    // Обновляем только сообщение
+                    const counter = document.getElementById(`counter-${msgId}`);
+                    if (counter) counter.textContent = `${chatHistory[msgIndex].currentVariant + 1} / ${chatHistory[msgIndex].variants.length}`;
+                } else {
+                    // Просто рендерим чат, чтобы добавить кнопки управления к новому сообщению
+                    renderChat(msgId);
+                }
 
-                // Обновляем статистику бота
+                // Обновляем статистику
                 try {
                     const botRef = doc(db, "bots", botId);
                     const botSnap = await getDoc(botRef);
