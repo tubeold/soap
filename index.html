@@ -81,7 +81,6 @@
         }
         .bot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: var(--primary-color); }
         
-        /* Шапка карточки с фоном (баннером) */
         .bot-card-header-bg {
             position: relative;
             padding: 16px 16px 8px 16px;
@@ -91,7 +90,6 @@
             background-size: cover;
             background-position: center;
         }
-        /* Затемняющий слой поверх баннера, чтобы текст читался */
         .bot-card-header-bg::before {
             content: '';
             position: absolute;
@@ -196,7 +194,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDijBugjXGUSD38usVRk2e_jwOou3Aw7p8",
@@ -267,18 +265,31 @@
             loadBots();
         });
 
-        // Загрузка истории ботов в левое меню
+        // Загрузка истории ботов в левое меню (УЛУЧШЕННАЯ ВЕРСИЯ С ЗАЩИТОЙ)
         async function loadUserBotHistory() {
-            const user = JSON.parse(localStorage.getItem('soaps_user'));
             const historyContainer = document.getElementById('history-container');
             
             try {
-                const userDocRef = doc(db, "accounts", user.id);
+                const user = JSON.parse(localStorage.getItem('soaps_user'));
+                
+                // Проверка на наличие uid
+                if (!user || !user.uid) {
+                    console.error("КРИТИЧЕСКАЯ ОШИБКА: В localStorage нет поля 'uid'. Перезайдите в аккаунт.");
+                    historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--error-color);">Ошибка: нет UID. Войдите заново.</div>`;
+                    return;
+                }
+
+                const userDocRef = doc(db, "accounts", user.uid);
                 const userSnap = await getDoc(userDocRef);
                 
-                if (!userSnap.exists()) return;
+                if (!userSnap.exists()) {
+                    console.error("Документ пользователя не найден в базе.");
+                    historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
+                    return;
+                }
                 
                 const userData = userSnap.data();
+                // Проверяем, есть ли массив botHistory, если нет — считаем пустым
                 const botHistoryIds = userData.botHistory || [];
                 
                 if (botHistoryIds.length === 0) {
@@ -287,29 +298,40 @@
                 }
 
                 let botsHtml = '<div class="history-title">История ботов</div>';
-                
+                let loadedCount = 0;
+
                 for (const bId of botHistoryIds) {
-                    const botSnap = await getDoc(doc(db, "bots", bId));
-                    if (botSnap.exists()) {
-                        const bot = botSnap.data();
-                        let avatarUrl = bot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
-                        
-                        botsHtml += `
-                            <div class="bot-history-item" onclick="window.location.href='chat.html?id=${bId}'">
-                                <img src="${avatarUrl}" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
-                                <div class="bot-history-info">
-                                    <div class="bot-history-name">${bot.name}</div>
-                                    <div class="bot-history-author">@${bot.authorName || 'author'}</div>
+                    try {
+                        const botSnap = await getDoc(doc(db, "bots", bId));
+                        if (botSnap.exists()) {
+                            loadedCount++;
+                            const bot = botSnap.data();
+                            let avatarUrl = bot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
+                            
+                            botsHtml += `
+                                <div class="bot-history-item" onclick="window.location.href='chat.html?id=${bId}'">
+                                    <img src="${avatarUrl}" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                    <div class="bot-history-info">
+                                        <div class="bot-history-name">${bot.name || 'Без названия'}</div>
+                                        <div class="bot-history-author">@${bot.authorName || 'author'}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        }
+                    } catch (botErr) {
+                        console.warn(`Не удалось загрузить бота с ID ${bId}:`, botErr);
                     }
                 }
                 
-                historyContainer.innerHTML = botsHtml;
+                if (loadedCount === 0) {
+                    historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
+                } else {
+                    historyContainer.innerHTML = botsHtml;
+                }
+                
             } catch (error) {
-                console.error("Ошибка загрузки истории:", error);
-                historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--error-color);">Ошибка загрузки</div>`;
+                console.error("ОШИБКА ЗАГРУЗКИ ИСТОРИИ:", error);
+                historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--error-color);">Не удалось загрузить. Попробуйте обновить.</div>`;
             }
         }
 
@@ -320,11 +342,13 @@
             try {
                 const botsRef = collection(db, "bots");
                 const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
-                const userId = currentUser ? currentUser.id : null;
+                const userId = currentUser ? currentUser.uid : null; // ИСПРАВЛЕНО: используем uid
 
+                // Популярные
                 const qPopular = query(botsRef, orderBy("stats.likes", "desc"), limit(10));
                 const popularSnapshot = await getDocs(qPopular);
                 
+                // Последние
                 const qRecent = query(botsRef, orderBy("createdAt", "desc"), limit(10));
                 const recentSnapshot = await getDocs(qRecent);
 
@@ -347,13 +371,12 @@
                             avatarUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}`;
                         }
                         
-                        // Баннер для шапки
+                        // Баннер
                         let bannerStyle = '';
                         if (bot.banner) {
                             const bannerUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.banner}`;
                             bannerStyle = `background-image: url('${bannerUrl}');`;
                         } else {
-                            // Если баннера нет, оставляем просто цвет surface
                             bannerStyle = `background-color: var(--surface-color);`;
                         }
 
