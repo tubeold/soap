@@ -24,22 +24,38 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text-primary); transition: background-color 0.3s; padding-bottom: 60px; overflow-x: hidden; }
         
+        /* Шапка сайта */
         header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background-color: var(--header-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
         .header-left { display: flex; align-items: center; gap: 12px; }
         .logo-container img { height: 32px; border-radius: 4px; }
         .menu-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .menu-btn:hover { background-color: var(--hover-bg); }
         
+        /* Поиск */
         .search-bar-container { flex-grow: 1; margin: 0 16px; display: flex; justify-content: center; max-width: 600px; }
         .search-input-wrapper { display: flex; align-items: center; background-color: var(--surface-color); border-radius: 24px; padding: 8px 16px; width: 100%; border: 1px solid var(--border-color); }
         .search-input-wrapper input { background: none; border: none; color: var(--text-primary); outline: none; font-size: 14px; width: 100%; }
         
-        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; padding: 16px 0; display: flex; flex-direction: column; }
+        /* Боковое меню */
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; display: flex; flex-direction: column; }
         .drawer.open { left: 0; }
-        .drawer-header { padding: 0 16px 16px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
-        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
+        .drawer-header { padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .drawer-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
         .drawer-item:hover { background-color: var(--hover-bg); }
         
+        /* История ботов в меню */
+        .history-section { border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 8px; }
+        .history-title { font-size: 12px; color: var(--text-secondary); padding: 0 24px 8px 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bot-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 24px; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
+        .bot-history-item:hover { background-color: var(--hover-bg); }
+        .bot-history-item.active { background-color: var(--hover-bg); border-left-color: var(--primary-color); }
+        .bot-history-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .bot-history-info { display: flex; flex-direction: column; overflow: hidden; }
+        .bot-history-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bot-history-author { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .bottom-section { padding-bottom: 16px; border-top: 1px solid var(--border-color); margin-top: auto; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .overlay.active { display: block; }
         
@@ -48,8 +64,10 @@
         .dropdown-menu a { padding: 12px 16px; text-decoration: none; color: var(--text-primary); font-size: 14px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
         .dropdown-menu a:hover { background-color: var(--hover-bg); }
 
+        /* Основной контейнер */
         #app { max-width: 800px; margin: 0 auto; padding: 16px; }
 
+        /* --- ПРОФИЛЬ --- */
         .profile-header { position: relative; border-radius: 12px; overflow: hidden; background-color: var(--surface-color); border: 1px solid var(--border-color); margin-bottom: 24px; }
         .profile-banner { width: 100%; height: 200px; object-fit: cover; background-color: var(--border-color); display: block; }
         .profile-info-container { padding: 0 24px 24px 24px; position: relative; }
@@ -66,6 +84,7 @@
         .profile-stats { display: flex; gap: 20px; font-size: 14px; color: var(--text-secondary); }
         .profile-stats strong { color: var(--text-primary); font-size: 16px; }
         
+        /* Список ботов */
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
         .bot-grid { display: flex; flex-direction: column; gap: 8px; }
         
@@ -107,26 +126,30 @@
     <div id="main-app" class="hidden" style="display:none;">
         <div class="overlay" id="overlay"></div>
 
+        <!-- Меню -->
         <div class="drawer" id="drawer">
             <div class="drawer-header">
                 <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Logo" style="height: 24px;">
                 <span style="font-weight: 700; font-size: 18px;">Soap AI</span>
             </div>
-            <a class="drawer-item" href="index.html">
-                <span class="material-icons-outlined">home</span> Главная
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('profile.html')">
-                <span class="material-icons-outlined">person</span> Профиль
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('create.html')">
-                <span class="material-icons-outlined">add_circle_outline</span> Создать бота
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('settings.html')">
-                <span class="material-icons-outlined">settings</span> Настройки
-            </a>
-            <a class="drawer-item" onclick="logout()" style="color: red; margin-top: auto;">
-                <span class="material-icons-outlined" style="color: red;">logout</span> Выйти
-            </a>
+            <div class="drawer-content">
+                <div class="nav-section">
+                    <a class="drawer-item" href="index.html"><span class="material-icons-outlined">home</span> Главная</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('profile.html')" style="background-color: var(--hover-bg);"><span class="material-icons-outlined">person</span> Профиль</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('create.html')"><span class="material-icons-outlined">add_circle_outline</span> Создать бота</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('settings.html')"><span class="material-icons-outlined">settings</span> Настройки</a>
+                </div>
+                
+                <!-- ИСТОРИЯ БОТОВ -->
+                <div class="history-section" id="history-container">
+                    <div class="history-title">История ботов</div>
+                </div>
+            </div>
+            <div class="bottom-section">
+                <a class="drawer-item" onclick="logout()" style="color: var(--error-color);">
+                    <span class="material-icons-outlined" style="color: var(--error-color);">logout</span> Выйти
+                </a>
+            </div>
         </div>
 
         <header>
@@ -163,7 +186,7 @@
         </main>
     </div>
 
-    <!-- Экран ошибки с возможностью скопировать -->
+    <!-- Экран ошибки -->
     <div id="error-screen">
         <h2>Произошла ошибка</h2>
         <p style="margin-bottom: 16px; color: var(--text-secondary); max-width: 500px;">
@@ -222,6 +245,7 @@
             window.location.href = 'registration.html';
         };
 
+        // Парсер BBCode
         function parseBBCode(text) {
             if (!text) return "";
             let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -245,6 +269,52 @@
             return safeText;
         }
 
+        // Загрузка истории ботов в левое меню
+        async function loadUserBotHistory() {
+            const user = JSON.parse(localStorage.getItem('soaps_user'));
+            const historyContainer = document.getElementById('history-container');
+            
+            try {
+                const userDocRef = doc(db, "accounts", user.uid);
+                const userSnap = await getDoc(userDocRef);
+                
+                if (!userSnap.exists()) return;
+                
+                const userData = userSnap.data();
+                const botHistoryIds = userData.botHistory || [];
+                
+                if (botHistoryIds.length === 0) {
+                    historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
+                    return;
+                }
+
+                let botsHtml = '<div class="history-title">История ботов</div>';
+                
+                for (const bId of botHistoryIds) {
+                    const botSnap = await getDoc(doc(db, "bots", bId));
+                    if (botSnap.exists()) {
+                        const bot = botSnap.data();
+                        let avatarUrl = bot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
+                        
+                        botsHtml += `
+                            <div class="bot-history-item" onclick="window.location.href='chat.html?id=${bId}'">
+                                <img src="${avatarUrl}" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                <div class="bot-history-info">
+                                    <div class="bot-history-name">${bot.name}</div>
+                                    <div class="bot-history-author">@${bot.authorName || 'author'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                historyContainer.innerHTML = botsHtml;
+            } catch (error) {
+                console.error("Ошибка загрузки истории:", error);
+                historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--error-color);">Ошибка загрузки</div>`;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 if (!isUserLoggedIn()) {
@@ -255,10 +325,10 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const targetProfileId = urlParams.get('id');
 
-                // Если нет ID — редирект на свой профиль с ником
+                // Если нет ID — редирект на свой профиль по uid
                 if (!targetProfileId) {
                     const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
-                    window.location.replace(`profile.html?id=${currentUser.username}`);
+                    window.location.replace(`profile.html?id=${currentUser.uid}`);
                     return;
                 }
 
@@ -281,37 +351,46 @@
                     if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
                 });
 
-                // --- ЗАГРУЗКА ДАННЫХ ---
+                // Загружаем историю ботов в левое меню
+                await loadUserBotHistory();
+
+                // --- ЗАГРУЗКА ДАННЫХ ПРОФИЛЯ ---
                 const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
-                let profileUserId = currentUser.id;
+                let profileUid = currentUser.uid;
                 let isOwnProfile = true;
 
-                const usersRef = collection(db, "accounts");
-                const qUsername = query(usersRef, where("username", "==", targetProfileId));
-                const snapUsername = await getDocs(qUsername);
+                // Ищем пользователя по uid или username
+                // Сначала пробуем как uid (документ)
+                const userDocRef = doc(db, "accounts", targetProfileId);
+                const userDocSnap = await getDoc(userDocRef);
                 
-                if (!snapUsername.empty) {
-                    profileUserId = snapUsername.docs[0].id;
-                    if (profileUserId !== currentUser.id) isOwnProfile = false;
+                if (userDocSnap.exists()) {
+                    // Это uid
+                    profileUid = userDocSnap.id;
+                    if (profileUid !== currentUser.uid) isOwnProfile = false;
                 } else {
-                    const docRef = doc(db, "accounts", targetProfileId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        profileUserId = docSnap.id;
-                        if (profileUserId !== currentUser.id) isOwnProfile = false;
+                    // Пробуем найти по username
+                    const usersRef = collection(db, "accounts");
+                    const qUsername = query(usersRef, where("username", "==", targetProfileId));
+                    const snapUsername = await getDocs(qUsername);
+                    
+                    if (!snapUsername.empty) {
+                        profileUid = snapUsername.docs[0].id;
+                        if (profileUid !== currentUser.uid) isOwnProfile = false;
                     } else {
-                        throw new Error("Пользователь не найден в базе данных.");
+                        throw new Error("Пользователь не найден.");
                     }
                 }
 
-                const userDocRef = doc(db, "accounts", profileUserId);
-                const userDocSnap = await getDoc(userDocRef);
+                // Загружаем данные профиля
+                const userDocRef2 = doc(db, "accounts", profileUid);
+                const userDocSnap2 = await getDoc(userDocRef2);
                 
-                if (!userDocSnap.exists()) {
+                if (!userDocSnap2.exists()) {
                     throw new Error("Документ пользователя не существует.");
                 }
 
-                const userData = userDocSnap.data();
+                const userData = userDocSnap2.data();
                 
                 let avatarUrl = "https://i.ibb.co/B2gVk6pX/icon.png";
                 if (userData.avatar) {
@@ -323,8 +402,9 @@
                     bannerUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${userData.banner}`;
                 }
 
+                // Загружаем ботов этого пользователя (по authorId = uid)
                 const botsRef = collection(db, "bots");
-                const qBots = query(botsRef, where("authorId", "==", profileUserId));
+                const qBots = query(botsRef, where("authorId", "==", profileUid));
                 const botsSnapshot = await getDocs(qBots);
                 
                 let totalLikes = 0;
@@ -412,7 +492,7 @@
 
             } catch (error) {
                 console.error("Критическая ошибка профиля:", error);
-                window.showError(error.message + "\n\n" + error.stack);
+                window.showError(error.message + "\n\n" + (error.stack || ''));
             }
         });
     </script>

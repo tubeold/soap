@@ -202,7 +202,6 @@
             
             <form id="step2Form" onsubmit="event.preventDefault(); finishRegistration();">
                 
-                <!-- Баннер -->
                 <div class="form-group">
                     <label class="form-label">Баннер профиля</label>
                     <div class="upload-zone banner-zone" onclick="document.getElementById('regBanner').click()">
@@ -219,7 +218,6 @@
                     <input type="file" id="regBanner" accept="image/*" style="display: none;">
                 </div>
 
-                <!-- Аватарка + Имя -->
                 <div class="avatar-row">
                     <div class="avatar-zone-wrapper">
                         <div class="upload-zone avatar-zone" onclick="document.getElementById('regAvatar').click()">
@@ -242,12 +240,11 @@
                     </div>
                 </div>
 
-                <!-- Описание -->
                 <div class="form-group">
                     <label class="form-label" for="regBio">Описание профиля</label>
                     <textarea id="regBio" class="form-textarea" placeholder="Расскажите о себе..." maxlength="300"></textarea>
                     <div class="form-subtext">
-                        Поддерживаются теги: <strong>**жирный**</strong>, <em>*курсив*</em>, <span style="color:red;">[color=red]красный[/color]</span>, [size=20]размер[/size]. Теги должны быть правильно закрыты.
+                        Поддерживаются теги: <strong>**жирный**</strong>, <em>*курсив*</em>, <span style="color:red;">[color=red]красный[/color]</span>.
                     </div>
                 </div>
 
@@ -334,6 +331,11 @@
             }
         };
 
+        // Генерация случайного UID (например, user_a1b2c3d4)
+        function generateUID() {
+            return 'user_' + Math.random().toString(36).substr(2, 9);
+        }
+
         window.finishRegistration = async () => {
             const displayName = document.getElementById('regDisplayName').value.trim();
             const bio = document.getElementById('regBio').value.trim();
@@ -376,22 +378,24 @@
                     if (data.public_id) bannerId = data.public_id;
                 }
 
-                // ВАЖНО: Теперь ID пользователя — это его никнейм (в нижнем регистре)
-                const userId = tempUser.username.toLowerCase();
+                // ГЕНЕРИРУЕМ УНИКАЛЬНЫЙ UID (неизменяемый)
+                const uid = generateUID();
 
-                await setDoc(doc(db, "accounts", userId), {
-                    id: userId,
+                // Создаем документ с ID = uid
+                await setDoc(doc(db, "accounts", uid), {
+                    uid: uid,               // неизменяемый ID
                     username: tempUser.username,
                     displayName: displayName,
                     password: tempUser.password,
                     bio: bio,
                     avatar: avatarId,
                     banner: bannerId,
+                    botHistory: [],         // Массив ID ботов для истории
                     createdAt: new Date()
                 });
 
                 const sessionUser = {
-                    id: userId,
+                    uid: uid,
                     username: tempUser.username,
                     displayName: displayName,
                     avatar: avatarId,

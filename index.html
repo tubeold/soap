@@ -34,33 +34,92 @@
         .search-input-wrapper { display: flex; align-items: center; background-color: var(--surface-color); border-radius: 24px; padding: 8px 16px; width: 100%; border: 1px solid var(--border-color); }
         .search-input-wrapper input { background: none; border: none; color: var(--text-primary); outline: none; font-size: 14px; width: 100%; }
         
-        /* Меню (Drawer) */
-        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; padding: 16px 0; display: flex; flex-direction: column; }
+        /* Боковое меню */
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; display: flex; flex-direction: column; }
         .drawer.open { left: 0; }
-        .drawer-header { padding: 0 16px 16px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
-        
-        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
+        .drawer-header { padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .drawer-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
         .drawer-item:hover { background-color: var(--hover-bg); }
         
+        .history-section { border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 8px; }
+        .history-title { font-size: 12px; color: var(--text-secondary); padding: 0 24px 8px 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bot-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 24px; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
+        .bot-history-item:hover { background-color: var(--hover-bg); }
+        .bot-history-item.active { background-color: var(--hover-bg); border-left-color: var(--primary-color); }
+        .bot-history-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .bot-history-info { display: flex; flex-direction: column; overflow: hidden; }
+        .bot-history-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bot-history-author { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .bottom-section { padding-bottom: 16px; border-top: 1px solid var(--border-color); margin-top: auto; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .overlay.active { display: block; }
         
         .dropdown-menu { position: absolute; top: 60px; right: 16px; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 200px; z-index: 101; }
         .dropdown-menu.active { display: flex; }
-        
         .dropdown-menu a { padding: 12px 16px; text-decoration: none; color: var(--text-primary); font-size: 14px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
         .dropdown-menu a:hover { background-color: var(--hover-bg); }
-        
+
+        /* Контент */
         #app { max-width: 800px; margin: 0 auto; padding: 16px; }
         
-        .bot-list-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; color: var(--text-primary); }
-        .bot-list-item:hover { background-color: var(--hover-bg); }
-        .bot-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
-        .bot-info { flex-grow: 1; min-width: 0; }
-        .bot-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-        .bot-desc { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 4px; }
+        .section-title { font-size: 20px; font-weight: 700; margin: 24px 0 16px 0; display: flex; align-items: center; gap: 8px; }
+        .section-title:first-child { margin-top: 8px; }
         
-        /* Стили для пустых состояний */
+        /* Карточки ботов с баннером */
+        .bot-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 600px) {
+            .bot-grid { grid-template-columns: 1fr 1fr; }
+        }
+        
+        .bot-card { 
+            display: flex; flex-direction: column; background-color: var(--surface-color); 
+            border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; 
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; 
+            text-decoration: none; color: var(--text-primary); position: relative;
+        }
+        .bot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+        
+        /* Шапка карточки с фоном (баннером) */
+        .bot-card-header-bg {
+            position: relative;
+            padding: 16px 16px 8px 16px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            background-size: cover;
+            background-position: center;
+        }
+        /* Затемняющий слой поверх баннера, чтобы текст читался */
+        .bot-card-header-bg::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+        
+        .bot-card-avatar { position: relative; z-index: 2; width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); flex-shrink: 0; }
+        .bot-card-info { position: relative; z-index: 2; display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; }
+        .bot-card-name { font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .bot-card-author { font-size: 12px; color: #ddd; display: flex; align-items: center; gap: 4px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .bot-card-author span.material-icons-outlined { font-size: 14px; }
+        
+        .bot-card-desc { 
+            padding: 8px 16px 16px 16px; font-size: 13px; color: var(--text-secondary); 
+            line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
+            overflow: hidden; text-overflow: ellipsis; flex-grow: 1;
+        }
+        
+        .bot-card-footer { 
+            display: flex; align-items: center; gap: 16px; padding: 12px 16px; 
+            background-color: var(--header-bg); border-top: 1px solid var(--border-color);
+            font-size: 12px; color: var(--text-secondary);
+        }
+        .bot-stat { display: flex; align-items: center; gap: 4px; }
+        .bot-stat span.material-icons-outlined { font-size: 16px; color: var(--text-secondary); }
+        
         .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 14px; }
     </style>
 </head>
@@ -69,34 +128,33 @@
     <div id="main-app">
         <div class="overlay" id="overlay"></div>
 
-        <!-- Боковое меню -->
+        <!-- Левое меню -->
         <div class="drawer" id="drawer">
             <div class="drawer-header">
                 <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Logo" style="height: 24px;">
                 <span style="font-weight: 700; font-size: 18px;">Soap AI</span>
             </div>
-            
-            <a class="drawer-item" href="index.html">
-                <span class="material-icons-outlined">home</span> Главная
-            </a>
-            
-            <a class="drawer-item" onclick="checkAuthAndGo('profile.html')">
-                <span class="material-icons-outlined">person</span> Профиль
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('create.html')">
-                <span class="material-icons-outlined">add_circle_outline</span> Создать бота
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('settings.html')">
-                <span class="material-icons-outlined">settings</span> Настройки
-            </a>
-            
-            <a class="drawer-item" id="logout-btn" onclick="logout()" style="color: red; margin-top: auto; display: none;">
-                <span class="material-icons-outlined" style="color: red;">logout</span> Выйти
-            </a>
-            
-            <a class="drawer-item" id="login-btn" onclick="window.location.href='registration.html'" style="color: var(--primary-color); margin-top: auto;">
-                <span class="material-icons-outlined" style="color: var(--primary-color);">login</span> Войти
-            </a>
+            <div class="drawer-content">
+                <div class="nav-section">
+                    <a class="drawer-item" href="index.html"><span class="material-icons-outlined">home</span> Главная</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('profile.html')"><span class="material-icons-outlined">person</span> Профиль</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('create.html')"><span class="material-icons-outlined">add_circle_outline</span> Создать бота</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('settings.html')"><span class="material-icons-outlined">settings</span> Настройки</a>
+                </div>
+                
+                <!-- ИСТОРИЯ БОТОВ -->
+                <div class="history-section" id="history-container">
+                    <div class="history-title">История ботов</div>
+                </div>
+            </div>
+            <div class="bottom-section">
+                <a class="drawer-item" id="logout-btn" onclick="logout()" style="color: var(--error-color); display: none;">
+                    <span class="material-icons-outlined" style="color: var(--error-color);">logout</span> Выйти
+                </a>
+                <a class="drawer-item" id="login-btn" onclick="window.location.href='registration.html'" style="color: var(--primary-color);">
+                    <span class="material-icons-outlined" style="color: var(--primary-color);">login</span> Войти
+                </a>
+            </div>
         </div>
 
         <header>
@@ -130,13 +188,15 @@
         </div>
 
         <main id="app">
-            <div id="page-content"></div>
+            <div id="page-content">
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 40px;">Загрузка ботов...</p>
+            </div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDijBugjXGUSD38usVRk2e_jwOou3Aw7p8",
@@ -149,40 +209,26 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         const CLOUD_NAME = "dmhoqxtc";
 
-        // Проверка авторизации
-        window.isUserLoggedIn = () => {
-            return localStorage.getItem('soaps_user') !== null;
-        };
-
+        // Утилиты
+        window.isUserLoggedIn = () => localStorage.getItem('soaps_user') !== null;
         window.checkAuthAndGo = (url) => {
-            if (isUserLoggedIn()) {
-                window.location.href = url;
-            } else {
-                window.location.href = 'registration.html';
-            }
+            if (isUserLoggedIn()) window.location.href = url;
+            else window.location.href = 'registration.html';
         };
-
-        // Клик по боту (БЕЗ ЛОКАЛСТОРАДЖА, только ID)
-        window.openBot = (botId) => {
-            window.location.href = `chat.html?id=${botId}`;
-        };
-
         window.logout = () => {
             localStorage.removeItem('soaps_user');
             window.location.reload();
         };
 
-        // Парсер BBCode (для красивого отображения описания)
+        // Парсер BBCode
         function parseBBCode(text) {
             if (!text) return "";
             let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             safeText = safeText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
             safeText = safeText.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
             safeText = safeText.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, (match, color, content) => `<span style="color: ${color.trim()};">${content}</span>`);
-            safeText = safeText.replace(/\n/g, '<br>');
             return safeText;
         }
 
@@ -196,7 +242,7 @@
                 document.getElementById('menu-login').style.display = 'none';
             }
 
-            // Обработчики меню
+            // Меню
             document.getElementById('drawerBtn').addEventListener('click', () => {
                 document.getElementById('drawer').classList.add('open');
                 document.getElementById('overlay').classList.add('active');
@@ -215,34 +261,74 @@
                 if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
             });
 
+            if (loggedIn) {
+                loadUserBotHistory();
+            }
             loadBots();
         });
 
-        // Загрузка ботов из Firebase
+        // Загрузка истории ботов в левое меню
+        async function loadUserBotHistory() {
+            const user = JSON.parse(localStorage.getItem('soaps_user'));
+            const historyContainer = document.getElementById('history-container');
+            
+            try {
+                const userDocRef = doc(db, "accounts", user.id);
+                const userSnap = await getDoc(userDocRef);
+                
+                if (!userSnap.exists()) return;
+                
+                const userData = userSnap.data();
+                const botHistoryIds = userData.botHistory || [];
+                
+                if (botHistoryIds.length === 0) {
+                    historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
+                    return;
+                }
+
+                let botsHtml = '<div class="history-title">История ботов</div>';
+                
+                for (const bId of botHistoryIds) {
+                    const botSnap = await getDoc(doc(db, "bots", bId));
+                    if (botSnap.exists()) {
+                        const bot = botSnap.data();
+                        let avatarUrl = bot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
+                        
+                        botsHtml += `
+                            <div class="bot-history-item" onclick="window.location.href='chat.html?id=${bId}'">
+                                <img src="${avatarUrl}" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                <div class="bot-history-info">
+                                    <div class="bot-history-name">${bot.name}</div>
+                                    <div class="bot-history-author">@${bot.authorName || 'author'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                historyContainer.innerHTML = botsHtml;
+            } catch (error) {
+                console.error("Ошибка загрузки истории:", error);
+                historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--error-color);">Ошибка загрузки</div>`;
+            }
+        }
+
+        // Загрузка ботов для главной страницы
         async function loadBots() {
             const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <h2 style="margin-bottom: 16px; font-size: 20px;">Популярные боты</h2>
-                <div id="popular-list"><p style="color: var(--text-secondary);">Загрузка...</p></div>
-                <h2 style="margin: 24px 0 16px 0; font-size: 20px;">Последние боты</h2>
-                <div id="recent-list"><p style="color: var(--text-secondary);">Загрузка...</p></div>
-            `;
-
+            
             try {
                 const botsRef = collection(db, "bots");
                 const currentUser = JSON.parse(localStorage.getItem('soaps_user'));
                 const userId = currentUser ? currentUser.id : null;
 
-                // Запрос для популярных (сортировка по лайкам)
                 const qPopular = query(botsRef, orderBy("stats.likes", "desc"), limit(10));
                 const popularSnapshot = await getDocs(qPopular);
                 
-                // Запрос для последних (сортировка по дате)
                 const qRecent = query(botsRef, orderBy("createdAt", "desc"), limit(10));
                 const recentSnapshot = await getDocs(qRecent);
 
-                const renderBots = (snapshot, containerId, emptyMsg) => {
-                    const listContainer = document.getElementById(containerId);
+                const renderBots = (snapshot, emptyMsg) => {
                     let html = '';
                     let count = 0;
 
@@ -250,53 +336,88 @@
                         const bot = doc.data();
                         const botId = doc.id;
                         
-                        // ЛОГИКА ПРИВАТНОСТИ: Показываем, если бот публичный ИЛИ это наш бот
                         const isOwner = userId && bot.authorId === userId;
                         const isPublic = bot.privacy === 'public';
 
-                        if (!isPublic && !isOwner) return; // Пропускаем чужие приватные
+                        if (!isPublic && !isOwner) return;
 
                         count++;
                         let avatarUrl = "https://i.ibb.co/B2gVk6pX/icon.png";
                         if (bot.avatar) {
-                            avatarUrl = bot.avatar.startsWith('http') ? bot.avatar : `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}`;
+                            avatarUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}`;
+                        }
+                        
+                        // Баннер для шапки
+                        let bannerStyle = '';
+                        if (bot.banner) {
+                            const bannerUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.banner}`;
+                            bannerStyle = `background-image: url('${bannerUrl}');`;
+                        } else {
+                            // Если баннера нет, оставляем просто цвет surface
+                            bannerStyle = `background-color: var(--surface-color);`;
                         }
 
                         html += `
-                            <div class="bot-list-item" onclick="openBot('${botId}')">
-                                <img src="${avatarUrl}" class="bot-avatar" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
-                                <div class="bot-info">
-                                    <span class="bot-name">${bot.name || "Без названия"}</span>
-                                    <span class="bot-desc">${parseBBCode(bot.description || "Описание отсутствует")}</span>
+                            <div class="bot-card" onclick="window.location.href='chat.html?id=${botId}'">
+                                <div class="bot-card-header-bg" style="${bannerStyle}">
+                                    <img src="${avatarUrl}" class="bot-card-avatar" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                    <div class="bot-card-info">
+                                        <div class="bot-card-name">${bot.name || "Без названия"}</div>
+                                        <div class="bot-card-author">
+                                            <span class="material-icons-outlined">person</span>
+                                            @${bot.authorName || 'author'}
+                                        </div>
+                                    </div>
+                                    ${!isPublic ? '<span class="material-icons-outlined" style="color: #fff; font-size: 16px; position: relative; z-index: 2; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">lock</span>' : ''}
                                 </div>
-                                ${!isPublic ? '<span class="material-icons-outlined" style="color: var(--text-secondary); font-size: 16px;">lock</span>' : ''}
+                                <div class="bot-card-desc">
+                                    ${parseBBCode(bot.description || "Нет описания")}
+                                </div>
+                                <div class="bot-card-footer">
+                                    <div class="bot-stat">
+                                        <span class="material-icons-outlined">favorite</span>
+                                        ${bot.stats?.likes || 0}
+                                    </div>
+                                    <div class="bot-stat">
+                                        <span class="material-icons-outlined">chat_bubble_outline</span>
+                                        ${bot.stats?.messages || 0}
+                                    </div>
+                                </div>
                             </div>
                         `;
                     });
 
-                    if (count === 0) {
-                        listContainer.innerHTML = `<p style="color: var(--text-secondary);">${emptyMsg}</p>`;
-                    } else {
-                        listContainer.innerHTML = html;
-                    }
+                    if (count === 0) return `<p class="empty-state">${emptyMsg}</p>`;
+                    return `<div class="bot-grid">${html}</div>`;
                 };
 
-                renderBots(popularSnapshot, 'popular-list', 'Популярных ботов пока нет.');
-                renderBots(recentSnapshot, 'recent-list', 'Ботов пока нет.');
+                container.innerHTML = `
+                    <div class="section-title">
+                        <span class="material-icons-outlined" style="color: var(--primary-color);">local_fire_department</span>
+                        Популярные боты
+                    </div>
+                    ${renderBots(popularSnapshot, 'Популярных ботов пока нет.')}
+                    
+                    <div class="section-title">
+                        <span class="material-icons-outlined" style="color: var(--primary-color);">new_releases</span>
+                        Новые боты
+                    </div>
+                    ${renderBots(recentSnapshot, 'Ботов пока нет.')}
+                `;
 
             } catch (error) {
                 console.error("Ошибка Firebase:", error);
-                document.getElementById('popular-list').innerHTML = `<p style="color: red;">Ошибка загрузки. Проверьте базу данных.</p>`;
-                document.getElementById('recent-list').innerHTML = '';
+                container.innerHTML = `<p style="text-align: center; color: var(--error-color); margin-top: 40px;">Ошибка загрузки ботов. Проверьте подключение к базе.</p>`;
             }
         }
 
-        // Поиск (заглушка, но можно сделать реальный фильтр)
+        // Поиск
         document.getElementById('globalSearchInput')?.addEventListener('input', (e) => {
             const queryText = e.target.value.toLowerCase();
-            document.querySelectorAll('.bot-list-item').forEach(el => {
-                const name = el.querySelector('.bot-name').textContent.toLowerCase();
-                el.style.display = name.includes(queryText) ? 'flex' : 'none';
+            document.querySelectorAll('.bot-card').forEach(el => {
+                const name = el.querySelector('.bot-card-name').textContent.toLowerCase();
+                const desc = el.querySelector('.bot-card-desc').textContent.toLowerCase();
+                el.style.display = (name.includes(queryText) || desc.includes(queryText)) ? 'flex' : 'none';
             });
         });
     </script>

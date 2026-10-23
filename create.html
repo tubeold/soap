@@ -30,12 +30,25 @@
         .menu-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .menu-btn:hover { background-color: var(--hover-bg); }
         
-        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; padding: 16px 0; display: flex; flex-direction: column; }
+        /* Боковое меню */
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; display: flex; flex-direction: column; }
         .drawer.open { left: 0; }
-        .drawer-header { padding: 0 16px 16px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
-        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
+        .drawer-header { padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .drawer-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
         .drawer-item:hover { background-color: var(--hover-bg); }
         
+        /* История ботов */
+        .history-section { border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 8px; }
+        .history-title { font-size: 12px; color: var(--text-secondary); padding: 0 24px 8px 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bot-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 24px; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
+        .bot-history-item:hover { background-color: var(--hover-bg); }
+        .bot-history-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .bot-history-info { display: flex; flex-direction: column; overflow: hidden; }
+        .bot-history-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bot-history-author { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .bottom-section { padding-bottom: 16px; border-top: 1px solid var(--border-color); margin-top: auto; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .overlay.active { display: block; }
         
@@ -94,26 +107,30 @@
     <div id="main-app">
         <div class="overlay" id="overlay"></div>
 
+        <!-- Левое меню -->
         <div class="drawer" id="drawer">
             <div class="drawer-header">
                 <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Logo" style="height: 24px;">
                 <span style="font-weight: 700; font-size: 18px;">Soap AI</span>
             </div>
-            <a class="drawer-item" href="index.html">
-                <span class="material-icons-outlined">home</span> Главная
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('profile.html')">
-                <span class="material-icons-outlined">person</span> Профиль
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('create.html')" style="background-color: var(--hover-bg);">
-                <span class="material-icons-outlined">add_circle_outline</span> Создать бота
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('settings.html')">
-                <span class="material-icons-outlined">settings</span> Настройки
-            </a>
-            <a class="drawer-item" id="logout-btn" onclick="logout()" style="color: red; margin-top: auto;">
-                <span class="material-icons-outlined" style="color: red;">logout</span> Выйти
-            </a>
+            <div class="drawer-content">
+                <div class="nav-section">
+                    <a class="drawer-item" href="index.html"><span class="material-icons-outlined">home</span> Главная</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('profile.html')"><span class="material-icons-outlined">person</span> Профиль</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('create.html')" style="background-color: var(--hover-bg);"><span class="material-icons-outlined">add_circle_outline</span> Создать бота</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('settings.html')"><span class="material-icons-outlined">settings</span> Настройки</a>
+                </div>
+                
+                <!-- ИСТОРИЯ БОТОВ -->
+                <div class="history-section" id="history-container">
+                    <div class="history-title">История ботов</div>
+                </div>
+            </div>
+            <div class="bottom-section">
+                <a class="drawer-item" onclick="logout()" style="color: var(--error-color);">
+                    <span class="material-icons-outlined" style="color: var(--error-color);">logout</span> Выйти
+                </a>
+            </div>
         </div>
 
         <header>
@@ -236,7 +253,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDijBugjXGUSD38usVRk2e_jwOou3Aw7p8",
@@ -261,20 +278,26 @@
         };
         window.logout = () => { localStorage.removeItem('soaps_user'); window.location.href = 'registration.html'; };
 
-        // === ПАРСЕР BBCode (для превью) ===
+        // === ПАРСЕР BBCode ===
         function parseBBCode(text) {
             if (!text) return "";
             let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             safeText = safeText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
             safeText = safeText.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
-            safeText = safeText.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, (match, color, content) => `<span style="color: ${color.trim()};">${content}</span>`);
+            safeText = safeText.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, (match, color, content) => {
+                const validColors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'black', 'white', 'pink', 'gray'];
+                const cleanColor = color.trim().toLowerCase();
+                if (validColors.includes(cleanColor) || cleanColor.startsWith('#')) {
+                    return `<span style="color: ${cleanColor};">${content}</span>`;
+                }
+                return match;
+            });
             safeText = safeText.replace(/\n/g, '<br>');
             return safeText;
         }
 
         // === ТРАНСЛИТЕРАЦИЯ НАЗВАНИЯ В ID ===
         function generateBotId(name) {
-            // Карта транслитерации
             const ruToEn = {
                 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
                 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
@@ -283,15 +306,56 @@
                 'я': 'ya'
             };
             let id = name.toLowerCase();
-            // Транслитерация
             id = id.split('').map(char => ruToEn[char] !== undefined ? ruToEn[char] : char).join('');
-            // Оставляем только буквы (a-z), цифры и подчеркивания
             id = id.replace(/[^a-z0-9_]/g, '_');
-            // Убираем множественные подчеркивания
             id = id.replace(/_+/g, '_');
-            // Убираем подчеркивания в начале и конце
             id = id.replace(/^_+|_+$/g, '');
             return id || 'bot';
+        }
+
+        // Загрузка истории ботов в меню
+        async function loadUserBotHistory() {
+            const user = JSON.parse(localStorage.getItem('soaps_user'));
+            const historyContainer = document.getElementById('history-container');
+            
+            try {
+                const userDocRef = doc(db, "accounts", user.uid);
+                const userSnap = await getDoc(userDocRef);
+                
+                if (!userSnap.exists()) return;
+                
+                const userData = userSnap.data();
+                const botHistoryIds = userData.botHistory || [];
+                
+                if (botHistoryIds.length === 0) {
+                    historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
+                    return;
+                }
+
+                let botsHtml = '<div class="history-title">История ботов</div>';
+                
+                for (const bId of botHistoryIds) {
+                    const botSnap = await getDoc(doc(db, "bots", bId));
+                    if (botSnap.exists()) {
+                        const bot = botSnap.data();
+                        let avatarUrl = bot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
+                        
+                        botsHtml += `
+                            <div class="bot-history-item" onclick="window.location.href='chat.html?id=${bId}'">
+                                <img src="${avatarUrl}" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                <div class="bot-history-info">
+                                    <div class="bot-history-name">${bot.name}</div>
+                                    <div class="bot-history-author">@${bot.authorName || 'author'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                historyContainer.innerHTML = botsHtml;
+            } catch (error) {
+                console.error("Ошибка загрузки истории:", error);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -318,6 +382,9 @@
                 const btn = document.getElementById('menuBtn');
                 if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
             });
+
+            // Загружаем историю
+            loadUserBotHistory();
 
             // Предпросмотр BBCode
             const botDescInput = document.getElementById('botDesc');
@@ -397,21 +464,18 @@
                 btnIcon.style.display = 'none';
 
                 try {
-                    // 1. Генерируем уникальный ID (base name + timestamp для уникальности)
                     let baseId = generateBotId(name);
                     let finalId = baseId + "_" + Date.now().toString().slice(-6);
                     
-                    // Проверяем, не занят ли ID (на всякий случай)
                     const docRef = doc(db, "bots", finalId);
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
-                        finalId = baseId + "_" + Date.now(); // если занят, делаем еще уникальнее
+                        finalId = baseId + "_" + Date.now();
                     }
 
                     let avatarId = "";
                     let bannerId = "";
 
-                    // Загрузка аватарки
                     if (avatarInput.files.length > 0) {
                         const formData = new FormData();
                         formData.append('file', avatarInput.files[0]);
@@ -422,7 +486,6 @@
                         else throw new Error("Ошибка загрузки аватарки: " + (data.error?.message || "неизвестно"));
                     }
 
-                    // Загрузка баннера
                     if (bannerInput.files.length > 0) {
                         const formData = new FormData();
                         formData.append('file', bannerInput.files[0]);
@@ -439,18 +502,18 @@
                         name: name,
                         description: description,
                         greeting: greeting,
-                        prompt: prompt,      // Системный промпт
-                        style: style,        // Стиль
+                        prompt: prompt,
+                        style: style,
                         privacy: privacy,
                         avatar: avatarId,
                         banner: bannerId,
-                        authorId: user.id,
+                        // ВАЖНО: Теперь используем uid пользователя
+                        authorId: user.uid,
                         authorName: user.username,
                         stats: { likes: 0, messages: 0 },
                         createdAt: new Date()
                     };
 
-                    // Сохраняем бота под нашим ID
                     await setDoc(docRef, botData);
                     
                     alert("Бот успешно создан!");

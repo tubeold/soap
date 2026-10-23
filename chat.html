@@ -100,13 +100,13 @@
         .history-section { flex-grow: 1; border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 8px; overflow-y: auto; }
         .history-title { font-size: 12px; color: var(--text-secondary); padding: 0 24px 8px 24px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .bot-list-item { display: flex; align-items: center; gap: 12px; padding: 10px 24px; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
-        .bot-list-item:hover { background-color: var(--hover-bg); }
-        .bot-list-item.active { background-color: var(--hover-bg); border-left-color: var(--primary-color); }
-        .bot-list-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-        .bot-list-info { display: flex; flex-direction: column; overflow: hidden; }
-        .bot-list-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .bot-list-author { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bot-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 24px; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
+        .bot-history-item:hover { background-color: var(--hover-bg); }
+        .bot-history-item.active { background-color: var(--hover-bg); border-left-color: var(--primary-color); }
+        .bot-history-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .bot-history-info { display: flex; flex-direction: column; overflow: hidden; }
+        .bot-history-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bot-history-author { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .bottom-section { padding-bottom: 16px; border-top: 1px solid var(--border-color); margin-top: auto; }
 
@@ -300,7 +300,7 @@
         
         .pinned-source { font-size: 11px; color: var(--primary-color); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 
-        /* Сообщение об ошибке (если бот не найден) */
+        /* Сообщение об ошибке */
         .error-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 20px; background: var(--bg-color); }
         .error-screen .material-icons-outlined { font-size: 64px; color: var(--error-color); margin-bottom: 20px; }
         .error-screen h1 { font-size: 24px; margin-bottom: 12px; }
@@ -317,7 +317,7 @@
         <div id="loader-text">Загрузка чата...</div>
     </div>
 
-    <!-- Основной интерфейс (скрыт до загрузки) -->
+    <!-- Основной интерфейс -->
     <div id="main-chat-ui" style="display: none; height: 100%; flex-direction: column;">
         <header class="bot-header" id="bot-header">
             <div class="bot-header-left">
@@ -367,8 +367,9 @@
                 <a class="drawer-item" href="create.html"><span class="material-icons-outlined">add_circle_outline</span> Создать бота</a>
                 <a class="drawer-item" href="settings.html"><span class="material-icons-outlined">settings</span> Настройки</a>
             </div>
-            <div class="history-section" id="bot-list-container">
+            <div class="history-section" id="history-container">
                 <div class="history-title">История ботов</div>
+                <!-- Сюда рендерятся боты из истории -->
             </div>
         </div>
         <div class="bottom-section">
@@ -417,6 +418,7 @@
         </div>
     </div>
 
+    <!-- Шторки -->
     <div class="bottom-sheet" id="historySheet">
         <div class="sheet-header" id="historyDragHandle">
             <span class="material-icons-outlined" style="cursor:pointer;" onclick="closeSheet('historySheet')">arrow_back</span>
@@ -444,9 +446,7 @@
                 <div class="preview-bg-layer" id="previewBgLayer"></div>
                 <div class="preview-color-overlay" id="previewColorOverlay"></div>
                 <div class="preview-content">
-                    <div class="preview-bubble preview-bot" id="previewBot">
-                        Привет! Я бот.
-                    </div>
+                    <div class="preview-bubble preview-bot" id="previewBot">Привет! Я бот.</div>
                     <div class="preview-bubble preview-user" id="previewUser">
                         <div class="preview-quote" id="previewQuote">Цитата</div>
                         Привет!
@@ -553,7 +553,6 @@
                     <input type="range" min="0" max="3" step="0.5" id="quote-text-stroke-width" oninput="updateTheme('quoteTextStrokeWidth', this.value)">
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -604,7 +603,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, deleteDoc
+            getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, arrayUnion
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -623,7 +622,6 @@
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
         const GROQ_MODEL = "openai/gpt-oss-20b";
 
-        // Глобальные переменные
         let currentUser = null;
         let currentBot = null;
         let botId = null;
@@ -652,7 +650,7 @@
         const COLORS = ['#121212', '#ffffff', '#1e1e1e', '#2c2c2c', '#1a237e', '#4a148c', '#b71c1c', '#1b5e20', '#ffebee', '#e8f5e9', '#e3f2fd'];
         const TEXT_COLORS = ['#e0e0e0', '#ffffff', '#000000', '#757575', '#a8e6cf', '#ffb74d', '#f44336', '#81c784'];
 
-        // --- УТИЛИТЫ ---
+        // Утилиты
         window.isUserLoggedIn = () => localStorage.getItem('soaps_user') !== null;
         window.logout = () => { localStorage.removeItem('soaps_user'); window.location.href = 'index.html'; };
 
@@ -695,7 +693,6 @@
             }
             currentUser = JSON.parse(localStorage.getItem('soaps_user'));
 
-            // Получаем ID бота из URL
             const urlParams = new URLSearchParams(window.location.search);
             botId = urlParams.get('id');
 
@@ -705,7 +702,7 @@
             }
 
             try {
-                // Загружаем бота из Firebase
+                // Загружаем бота
                 const botDocRef = doc(db, "bots", botId);
                 const botDocSnap = await getDoc(botDocRef);
 
@@ -717,9 +714,29 @@
                 currentBot = { id: botDocSnap.id, ...botDocSnap.data() };
 
                 // Проверка приватности
-                if (currentBot.privacy === 'private' && currentBot.authorId !== currentUser.id) {
+                if (currentBot.privacy === 'private' && currentBot.authorId !== currentUser.uid) {
                     showErrorScreen();
                     return;
+                }
+
+                // *** ДОБАВЛЯЕМ БОТА В ИСТОРИЮ ПОЛЬЗОВАТЕЛЯ ***
+                try {
+                    const userDocRef = doc(db, "accounts", currentUser.uid);
+                    const userSnap = await getDoc(userDocRef);
+                    
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        const botHistory = userData.botHistory || [];
+                        
+                        if (!botHistory.includes(botId)) {
+                            await updateDoc(userDocRef, {
+                                botHistory: arrayUnion(botId)
+                            });
+                            console.log("Бот добавлен в историю");
+                        }
+                    }
+                } catch (e) {
+                    console.error("Ошибка добавления в историю:", e);
                 }
 
                 // Настройка UI
@@ -729,7 +746,7 @@
                 
                 let avatarUrl = "https://i.ibb.co/B2gVk6pX/icon.png";
                 if (currentBot.avatar) {
-                    avatarUrl = currentBot.avatar.startsWith('http') ? currentBot.avatar : `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentBot.avatar}`;
+                    avatarUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentBot.avatar}`;
                 }
                 document.getElementById('header-avatar').src = avatarUrl;
                 document.getElementById('card-avatar').src = avatarUrl;
@@ -739,19 +756,17 @@
                 let bannerUrl = currentBot.banner ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentBot.banner}` : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
                 document.getElementById('card-banner').style.backgroundImage = `url('${bannerUrl}')`;
 
-                // Загружаем статистику
                 currentRep = currentBot.stats?.likes || 0;
                 document.getElementById('card-msgs').textContent = currentBot.stats?.messages || 0;
                 updateRepUI();
 
-                // Загружаем историю чатов пользователя с этим ботом
+                // Загружаем историю чатов
                 await loadChats();
 
                 // Показываем интерфейс
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('main-chat-ui').style.display = 'flex';
 
-                // Привязываем события
                 setupEventListeners();
 
             } catch (error) {
@@ -765,11 +780,10 @@
             document.getElementById('error-screen').style.display = 'flex';
         }
 
-        // --- ЗАГРУЗКА ИСТОРИИ ЧАТОВ ---
+        // --- ЗАГРУЗКА ЧАТОВ ---
         async function loadChats() {
-            // Ищем чаты текущего пользователя с этим ботом
             const chatsRef = collection(db, "chats");
-            const q = query(chatsRef, where("userId", "==", currentUser.id), where("botId", "==", botId));
+            const q = query(chatsRef, where("userId", "==", currentUser.uid), where("botId", "==", botId));
             const snapshot = await getDocs(q);
 
             allChats = [];
@@ -777,7 +791,7 @@
                 allChats.push({ id: doc.id, ...doc.data() });
             });
 
-            // Сортируем по updatedAt (сначала новые)
+            // Сортируем
             allChats.sort((a, b) => {
                 const dateA = a.updatedAt?.toDate ? a.updatedAt.toDate() : new Date(a.updatedAt || 0);
                 const dateB = b.updatedAt?.toDate ? b.updatedAt.toDate() : new Date(b.updatedAt || 0);
@@ -785,19 +799,17 @@
             });
 
             if (allChats.length === 0) {
-                // Создаем новый чат, если истории нет
                 await createNewChat();
             } else {
-                // Загружаем последний активный чат
                 loadChat(allChats[0].id);
             }
             
-            renderBotList();
+            renderBotHistory();
         }
 
         async function createNewChat() {
             const newChatData = {
-                userId: currentUser.id,
+                userId: currentUser.uid,
                 botId: botId,
                 title: 'Новый чат',
                 messages: [{ 
@@ -811,14 +823,14 @@
                 updatedAt: serverTimestamp()
             };
 
-            const docRef = await doc(collection(db, "chats"));
+            const docRef = doc(collection(db, "chats"));
             await setDoc(docRef, newChatData);
             
             allChats.unshift({ id: docRef.id, ...newChatData });
             currentChatId = docRef.id;
             
             loadChat(currentChatId);
-            renderBotList();
+            renderBotHistory();
         }
 
         function loadChat(chatId) {
@@ -844,7 +856,6 @@
                 updatedAt: serverTimestamp()
             };
 
-            // Обновляем заголовок, если есть первое сообщение пользователя
             const firstUserMsg = chatHistory.find(m => m.role === 'user');
             if (firstUserMsg) {
                 let text = firstUserMsg.variants[0].replace(/[*_~]/g, '');
@@ -860,13 +871,57 @@
             }
         }
 
+        // --- ИСТОРИЯ БОТОВ (ЛЕВОЕ МЕНЮ) ---
+        async function renderBotHistory() {
+            const container = document.getElementById('history-container');
+            
+            try {
+                const userDocRef = doc(db, "accounts", currentUser.uid);
+                const userSnap = await getDoc(userDocRef);
+                
+                if (!userSnap.exists()) return;
+                
+                const userData = userSnap.data();
+                const botHistoryIds = userData.botHistory || [];
+                
+                if (botHistoryIds.length === 0) {
+                    container.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
+                    return;
+                }
+
+                let botsHtml = '<div class="history-title">История ботов</div>';
+                
+                for (const bId of botHistoryIds) {
+                    const botSnap = await getDoc(doc(db, "bots", bId));
+                    if (botSnap.exists()) {
+                        const bot = botSnap.data();
+                        let avatarUrl = bot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
+                        
+                        const isActive = bId === botId;
+                        
+                        botsHtml += `
+                            <div class="bot-history-item ${isActive ? 'active' : ''}" onclick="window.location.href='chat.html?id=${bId}'">
+                                <img src="${avatarUrl}" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                <div class="bot-history-info">
+                                    <div class="bot-history-name">${bot.name}</div>
+                                    <div class="bot-history-author">@${bot.authorName || 'author'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                container.innerHTML = botsHtml;
+            } catch (error) {
+                console.error("Ошибка истории:", error);
+            }
+        }
+
         // --- UI ЛОГИКА ---
         function setupEventListeners() {
-            // Меню
             document.getElementById('drawerLeftBtn').onclick = () => {
                 document.getElementById('drawerLeft').classList.add('open');
                 document.getElementById('drawerOverlay').classList.add('active');
-                renderBotList();
             };
             document.getElementById('drawerRightBtn').onclick = () => {
                 document.getElementById('drawerRight').classList.add('open');
@@ -874,7 +929,6 @@
             };
             document.getElementById('drawerOverlay').onclick = closeDrawers;
 
-            // Ввод текста
             document.getElementById('message-input').oninput = (e) => handleInput(e.target);
 
             setupKeyboard();
@@ -886,25 +940,6 @@
             document.getElementById('drawerRight').classList.remove('open');
             document.getElementById('drawerOverlay').classList.remove('active');
         };
-
-        function renderBotList() {
-            const container = document.getElementById('bot-list-container');
-            // Оставляем только заголовок и ссылку на текущего бота
-            container.innerHTML = '<div class="history-title">История ботов</div>';
-            
-            const el = document.createElement('div');
-            el.className = `bot-list-item active`;
-            let avatarUrl = currentBot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentBot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
-            
-            el.innerHTML = `
-                <img src="${avatarUrl}">
-                <div class="bot-list-info">
-                    <div class="bot-list-name">${currentBot.name}</div>
-                    <div class="bot-list-author">@${currentBot.authorName}</div>
-                </div>
-            `;
-            container.appendChild(el);
-        }
 
         function setupKeyboard() {
             const bottomPanel = document.getElementById('bottom-panel');
@@ -965,7 +1000,7 @@
             });
         }
 
-        // --- ТЕМА И ВНЕШНИЙ ВИД ---
+        // --- ТЕМА ---
         function applyThemeToDOM() {
             const bgLayer = document.getElementById('chat-bg-layer');
             const overlay = document.getElementById('chat-color-overlay');
@@ -1153,7 +1188,7 @@
             document.getElementById(`tab-${tabId}`).classList.add('active');
         };
 
-        // --- ИСТОРИЯ СООБЩЕНИЙ (Шторка) ---
+        // --- ШТОРКА ИСТОРИИ ---
         window.openHistorySheet = () => {
             closeDrawers();
             const sheet = document.getElementById('historySheet');
@@ -1279,7 +1314,7 @@
             
             cancelReply(); 
             renderChat();
-            saveCurrentChat(); // Сохраняем сразу после отправки пользователем
+            saveCurrentChat();
             generateResponse();
         };
 
@@ -1389,10 +1424,9 @@
             if (!pendingBranchId) return;
             const msgIndex = chatHistory.findIndex(m => m.id === pendingBranchId);
             if (msgIndex !== -1) {
-                // Создаем новый чат в Firebase
                 const newMessages = JSON.parse(JSON.stringify(chatHistory.slice(0, msgIndex + 1)));
                 const newChatData = {
-                    userId: currentUser.id,
+                    userId: currentUser.uid,
                     botId: botId,
                     title: 'Ветка от ' + (currentBot.name || 'бота'),
                     messages: newMessages,
@@ -1400,10 +1434,9 @@
                     updatedAt: serverTimestamp()
                 };
                 
-                const docRef = await doc(collection(db, "chats"));
+                const docRef = doc(collection(db, "chats"));
                 await setDoc(docRef, newChatData);
                 
-                // Обновляем локальный массив
                 allChats.unshift({ id: docRef.id, ...newChatData });
                 showToast("Создана новая ветка");
                 loadChat(docRef.id);
@@ -1628,7 +1661,7 @@
             }, 250);
         };
 
-        // --- ОТВЕТ ИИ (С УЧЕТОМ БОТА И ПРОМПТОВ) ---
+        // --- ОТВЕТ ИИ ---
         async function generateResponse(targetMsgId = null, isNewVariant = false) {
             if (isGenerating) return;
             isGenerating = true;
@@ -1680,7 +1713,7 @@
                 .slice(contextStartIndex, isNewVariant ? msgIndex : chatHistory.length)
                 .map(m => ({ role: m.role, content: m.variants[m.currentVariant] }));
 
-            // СБОРКА ПРОМПТА: Системный промпт бота + описание + стиль
+            // СБОРКА ПРОМПТА
             let finalSystemPrompt = currentBot.prompt || "Ты - дружелюбный ассистент.";
             if (currentBot.description) {
                 finalSystemPrompt += `\n\nОписание твоего персонажа: ${currentBot.description}`;
@@ -1688,7 +1721,6 @@
             if (currentBot.style) {
                 finalSystemPrompt += `\n\nСтиль общения: ${currentBot.style}`;
             }
-            // Добавляем инструкцию по форматированию
             finalSystemPrompt += `\n\nИспользуй *звездочки* для действий и **жирный** для важного.`;
 
             const messages = [
@@ -1743,7 +1775,7 @@
                 await saveCurrentChat();
                 renderChat(msgId);
 
-                // Обновляем статистику бота (кол-во сообщений)
+                // Обновляем статистику бота
                 try {
                     const botRef = doc(db, "bots", botId);
                     const botSnap = await getDoc(botRef);
@@ -1752,7 +1784,7 @@
                         await updateDoc(botRef, { "stats.messages": (currentStats.messages || 0) + 1 });
                         document.getElementById('card-msgs').textContent = (currentStats.messages || 0) + 1;
                     }
-                } catch (e) { /* ignore stats error */ }
+                } catch (e) { /* ignore */ }
 
             } catch (error) {
                 console.error("AI Error:", error);
@@ -1763,7 +1795,7 @@
             }
         }
 
-        // --- ВСПОМОГАТЕЛЬНЫЕ ---
+        // --- РЕЙТИНГ ---
         function updateRepUI() {
             document.getElementById('card-rep').textContent = currentRep;
             document.getElementById('repPlusBtn').classList.toggle('positive', currentVote === 1);
@@ -1772,27 +1804,16 @@
 
         window.voteBot = async (type) => {
             const botRef = doc(db, "bots", botId);
-            
-            // Сначала считываем текущее состояние
             const botSnap = await getDoc(botRef);
             if (!botSnap.exists()) return;
             
             let currentLikes = botSnap.data().stats?.likes || 0;
             
-            // Логика голосования (упрощенно, без запоминания кто голосовал в базе, 
-            // просто визуальное изменение и обновление счетчика в боте)
             if (currentVote === type) {
-                currentRep -= type; 
-                currentLikes -= type;
-                currentVote = 0;
+                currentRep -= type; currentLikes -= type; currentVote = 0;
             } else {
-                if (currentVote !== 0) {
-                    currentRep -= currentVote;
-                    currentLikes -= currentVote;
-                }
-                currentRep += type; 
-                currentLikes += type;
-                currentVote = type;
+                if (currentVote !== 0) { currentRep -= currentVote; currentLikes -= currentVote; }
+                currentRep += type; currentLikes += type; currentVote = type;
             }
             
             updateRepUI();
@@ -1800,8 +1821,7 @@
         };
 
         window.copyBotLink = () => {
-            const url = window.location.href;
-            navigator.clipboard.writeText(url).then(() => {
+            navigator.clipboard.writeText(window.location.href).then(() => {
                 showToast('Ссылка скопирована!');
             });
         };

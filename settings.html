@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Базовые цвета */
         :root {
             --bg-color: #ffffff; --surface-color: #f5f5f5; --text-primary: #212121;
             --text-secondary: #757575; --primary-color: #1a1a2e; --accent-color: #a8e6cf; 
@@ -22,9 +21,8 @@
                 --border-color: #333333; --header-bg: #1e1e1e; --hover-bg: #2c2c2c; --sidebar-bg: #1e1e1e;
             }
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; padding-bottom: 60px; overflow-x: hidden; }
+        body { background-color: var(--bg-color); color: var(--text-primary); transition: background-color 0.3s; padding-bottom: 60px; overflow-x: hidden; }
         
         /* Шапка */
         header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background-color: var(--header-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
@@ -33,13 +31,25 @@
         .menu-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .menu-btn:hover { background-color: var(--hover-bg); }
         
-        /* Меню */
-        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; padding: 16px 0; display: flex; flex-direction: column; }
+        /* Боковое меню */
+        .drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); z-index: 200; transition: left 0.3s ease; display: flex; flex-direction: column; }
         .drawer.open { left: 0; }
-        .drawer-header { padding: 0 16px 16px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
-        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
+        .drawer-header { padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .drawer-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 500; }
         .drawer-item:hover { background-color: var(--hover-bg); }
         
+        /* История ботов в меню */
+        .history-section { border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 8px; }
+        .history-title { font-size: 12px; color: var(--text-secondary); padding: 0 24px 8px 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bot-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 24px; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
+        .bot-history-item:hover { background-color: var(--hover-bg); }
+        .bot-history-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .bot-history-info { display: flex; flex-direction: column; overflow: hidden; }
+        .bot-history-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bot-history-author { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .bottom-section { padding-bottom: 16px; border-top: 1px solid var(--border-color); margin-top: auto; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .overlay.active { display: block; }
         
@@ -116,21 +126,24 @@
                 <img src="https://i.ibb.co/cKgKxjWv/34-20261020191354.png" alt="Logo" style="height: 24px;">
                 <span style="font-weight: 700; font-size: 18px;">Soap AI</span>
             </div>
-            <a class="drawer-item" href="index.html">
-                <span class="material-icons-outlined">home</span> Главная
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('profile.html')">
-                <span class="material-icons-outlined">person</span> Профиль
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('create.html')">
-                <span class="material-icons-outlined">add_circle_outline</span> Создать бота
-            </a>
-            <a class="drawer-item" onclick="checkAuthAndGo('settings.html')" style="background-color: var(--hover-bg);">
-                <span class="material-icons-outlined">settings</span> Настройки
-            </a>
-            <a class="drawer-item" onclick="logout()" style="color: red; margin-top: auto;">
-                <span class="material-icons-outlined" style="color: red;">logout</span> Выйти
-            </a>
+            <div class="drawer-content">
+                <div class="nav-section">
+                    <a class="drawer-item" href="index.html"><span class="material-icons-outlined">home</span> Главная</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('profile.html')"><span class="material-icons-outlined">person</span> Профиль</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('create.html')"><span class="material-icons-outlined">add_circle_outline</span> Создать бота</a>
+                    <a class="drawer-item" onclick="checkAuthAndGo('settings.html')" style="background-color: var(--hover-bg);"><span class="material-icons-outlined">settings</span> Настройки</a>
+                </div>
+                
+                <!-- ИСТОРИЯ БОТОВ -->
+                <div class="history-section" id="history-container">
+                    <div class="history-title">История ботов</div>
+                </div>
+            </div>
+            <div class="bottom-section">
+                <a class="drawer-item" onclick="logout()" style="color: var(--error-color);">
+                    <span class="material-icons-outlined" style="color: var(--error-color);">logout</span> Выйти
+                </a>
+            </div>
         </div>
 
         <header>
@@ -234,23 +247,7 @@
                 </div>
             </div>
 
-            <!-- Секция 3: Приватность -->
-            <div class="settings-section">
-                <h2>Приватность</h2>
-                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div class="form-label" style="margin-bottom: 4px;">Показывать моих ботов в поиске</div>
-                        <div class="form-subtext">Если выключить, ваши боты будут доступны только по прямой ссылке.</div>
-                    </div>
-                    <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
-                        <input type="checkbox" id="privacyToggle" style="opacity: 0; width: 0; height: 0;">
-                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px;"></span>
-                        <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; pointer-events: none;"></span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Секция 4: Опасная зона -->
+            <!-- Секция 3: Опасная зона -->
             <div class="settings-section" style="border-color: var(--error-color);">
                 <h2 style="color: var(--error-color);">Опасная зона</h2>
                 <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
@@ -277,7 +274,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDijBugjXGUSD38usVRk2e_jwOou3Aw7p8",
@@ -295,6 +292,7 @@
         const UPLOAD_PRESET = "ml_default";
 
         let currentUserData = null;
+        let currentUserSession = null;
 
         // === УТИЛИТЫ ===
         window.isUserLoggedIn = () => localStorage.getItem('soaps_user') !== null;
@@ -320,6 +318,62 @@
         document.getElementById('themeLight').addEventListener('click', () => { localStorage.setItem('soap_theme', 'light'); applyTheme('light'); });
         document.getElementById('themeDark').addEventListener('click', () => { localStorage.setItem('soap_theme', 'dark'); applyTheme('dark'); });
 
+        // Парсер BBCode (для истории)
+        function parseBBCode(text) {
+            if (!text) return "";
+            let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            safeText = safeText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            safeText = safeText.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+            safeText = safeText.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, (match, color, content) => `<span style="color: ${color.trim()};">${content}</span>`);
+            return safeText;
+        }
+
+        // Загрузка истории ботов в меню
+        async function loadUserBotHistory() {
+            const user = JSON.parse(localStorage.getItem('soaps_user'));
+            const historyContainer = document.getElementById('history-container');
+            
+            try {
+                const userDocRef = doc(db, "accounts", user.uid);
+                const userSnap = await getDoc(userDocRef);
+                
+                if (!userSnap.exists()) return;
+                
+                const userData = userSnap.data();
+                const botHistoryIds = userData.botHistory || [];
+                
+                if (botHistoryIds.length === 0) {
+                    historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--text-secondary);">Пока пусто...</div>`;
+                    return;
+                }
+
+                let botsHtml = '<div class="history-title">История ботов</div>';
+                
+                for (const bId of botHistoryIds) {
+                    const botSnap = await getDoc(doc(db, "bots", bId));
+                    if (botSnap.exists()) {
+                        const bot = botSnap.data();
+                        let avatarUrl = bot.avatar ? `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${bot.avatar}` : 'https://i.ibb.co/B2gVk6pX/icon.png';
+                        
+                        botsHtml += `
+                            <div class="bot-history-item" onclick="window.location.href='chat.html?id=${bId}'">
+                                <img src="${avatarUrl}" onerror="this.src='https://i.ibb.co/B2gVk6pX/icon.png'">
+                                <div class="bot-history-info">
+                                    <div class="bot-history-name">${bot.name}</div>
+                                    <div class="bot-history-author">@${bot.authorName || 'author'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                historyContainer.innerHTML = botsHtml;
+            } catch (error) {
+                console.error("Ошибка загрузки истории:", error);
+                historyContainer.innerHTML = `<div class="history-title">История ботов</div><div style="padding: 0 24px; font-size: 12px; color: var(--error-color);">Ошибка загрузки</div>`;
+            }
+        }
+
         // === ОСНОВНАЯ ЛОГИКА ===
         document.addEventListener('DOMContentLoaded', async () => {
             if (!isUserLoggedIn()) {
@@ -327,23 +381,8 @@
                 return;
             }
 
-            // Применяем сохраненную тему
             const savedTheme = localStorage.getItem('soap_theme') || 'system';
             applyTheme(savedTheme);
-
-            // Настройка переключателя приватности
-            const toggle = document.getElementById('privacyToggle');
-            const slider = toggle.nextElementSibling;
-            const knob = slider.nextElementSibling;
-            toggle.addEventListener('change', () => {
-                if(toggle.checked) {
-                    slider.style.backgroundColor = 'var(--primary-color)';
-                    knob.style.transform = 'translateX(22px)';
-                } else {
-                    slider.style.backgroundColor = 'var(--border-color)';
-                    knob.style.transform = 'translateX(0)';
-                }
-            });
 
             // Меню
             document.getElementById('drawerBtn').addEventListener('click', () => { document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('active'); });
@@ -351,9 +390,12 @@
             document.getElementById('menuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('active'); });
             document.addEventListener('click', (e) => { const menu = document.getElementById('dropdownMenu'); const btn = document.getElementById('menuBtn'); if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active'); });
 
-            // Загружаем данные пользователя
-            const user = JSON.parse(localStorage.getItem('soaps_user'));
-            const userDocRef = doc(db, "accounts", user.id);
+            // Загружаем историю
+            await loadUserBotHistory();
+
+            // Загружаем данные пользователя по uid
+            currentUserSession = JSON.parse(localStorage.getItem('soaps_user'));
+            const userDocRef = doc(db, "accounts", currentUserSession.uid);
             const userDocSnap = await getDoc(userDocRef);
 
             if (userDocSnap.exists()) {
@@ -363,7 +405,6 @@
                 document.getElementById('setUsername').value = currentUserData.username || '';
                 document.getElementById('setBio').value = currentUserData.bio || '';
 
-                // Загружаем превью
                 if (currentUserData.avatar) {
                     const preview = document.getElementById('setAvatarPreview');
                     preview.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${currentUserData.avatar}`;
@@ -381,12 +422,12 @@
                 }
             }
 
-            // Валидация ника
+            // Валидация
             document.getElementById('setUsername').addEventListener('input', (e) => {
                 e.target.value = e.target.value.replace(/[^a-zA-Zа-яА-Я0-9\-_\.]/g, '');
             });
 
-            // Превью картинок
+            // Превью
             const setupPreview = (inputId, previewId, overlayId, hideSelectors = []) => {
                 const input = document.getElementById(inputId);
                 const preview = document.getElementById(previewId);
@@ -408,7 +449,7 @@
             setupPreview('setAvatar', 'setAvatarPreview', 'setAvatarOverlay', ['.avatar-zone span.material-icons-outlined']);
             setupPreview('setBanner', 'setBannerPreview', 'setBannerOverlay', ['.banner-icon', '.banner-text']);
 
-            // Сохранение профиля
+            // СОХРАНЕНИЕ ПРОФИЛЯ И СИНХРОНИЗАЦИЯ БОТОВ
             document.getElementById('profileSettingsForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
@@ -430,7 +471,7 @@
                 btn.innerHTML = '<span class="material-icons-outlined loading-spinner" style="display:inline-block;">sync</span> Сохранение...';
 
                 try {
-                    // 1. Проверка уникальности нового ника (если он изменился)
+                    // 1. Проверка уникальности нового ника
                     if (newUsername !== currentUserData.username) {
                         const usersRef = collection(db, "accounts");
                         const q = query(usersRef, where("username", "==", newUsername));
@@ -440,7 +481,7 @@
                         }
                     }
 
-                    // 2. Загрузка новых картинок (если выбраны)
+                    // 2. Загрузка картинок
                     let newAvatarId = currentUserData.avatar || "";
                     const avatarInput = document.getElementById('setAvatar');
                     if (avatarInput.files.length > 0) {
@@ -463,8 +504,8 @@
                         if (data.public_id) newBannerId = data.public_id;
                     }
 
-                    // 3. Обновляем запись в Firestore
-                    await updateDoc(doc(db, "accounts", currentUserData.id), {
+                    // 3. Обновляем аккаунт
+                    await updateDoc(doc(db, "accounts", currentUserSession.uid), {
                         displayName: newDisplayName,
                         username: newUsername,
                         bio: newBio,
@@ -472,16 +513,29 @@
                         banner: newBannerId
                     });
 
-                    // 4. Обновляем localStorage
-                    const sessionUser = JSON.parse(localStorage.getItem('soaps_user'));
-                    sessionUser.displayName = newDisplayName;
-                    sessionUser.username = newUsername;
-                    sessionUser.bio = newBio;
-                    sessionUser.avatar = newAvatarId;
-                    sessionUser.banner = newBannerId;
-                    localStorage.setItem('soaps_user', JSON.stringify(sessionUser));
+                    // 4. СИНХРОНИЗАЦИЯ С БОТАМИ
+                    // Находим всех ботов этого автора и обновляем им authorName
+                    const botsRef = collection(db, "bots");
+                    const qBots = query(botsRef, where("authorId", "==", currentUserSession.uid));
+                    const botsSnapshot = await getDocs(qBots);
+                    
+                    if (!botsSnapshot.empty) {
+                        const batch = writeBatch(db);
+                        botsSnapshot.forEach(botDoc => {
+                            batch.update(botDoc.ref, { authorName: newUsername });
+                        });
+                        await batch.commit();
+                    }
 
-                    alert("Настройки успешно сохранены!");
+                    // 5. Обновляем localStorage
+                    currentUserSession.displayName = newDisplayName;
+                    currentUserSession.username = newUsername;
+                    currentUserSession.bio = newBio;
+                    currentUserSession.avatar = newAvatarId;
+                    currentUserSession.banner = newBannerId;
+                    localStorage.setItem('soaps_user', JSON.stringify(currentUserSession));
+
+                    alert("Настройки сохранены! Имя обновлено на всех ваших ботах.");
                     window.location.reload();
 
                 } catch (error) {
@@ -494,7 +548,7 @@
             });
         });
 
-        // Удаление аккаунта
+        // УДАЛЕНИЕ АККАУНТА (с удалением ботов)
         window.deleteAccount = async () => {
             const passwordInput = document.getElementById('deletePassword').value;
             const errorDiv = document.getElementById('deleteError');
@@ -512,15 +566,24 @@
             btn.innerHTML = '<span class="material-icons-outlined loading-spinner" style="display:inline-block;">sync</span> Удаление...';
 
             try {
-                // Удаляем аккаунт из Firestore
-                await deleteDoc(doc(db, "accounts", currentUserData.id));
+                // 1. Удаляем всех ботов этого пользователя
+                const botsRef = collection(db, "bots");
+                const qBots = query(botsRef, where("authorId", "==", currentUserSession.uid));
+                const botsSnapshot = await getDocs(qBots);
                 
-                // В реальном проекте здесь нужно также удалить всех ботов и чаты,
-                // но для демо мы просто удаляем аккаунт.
+                const batch = writeBatch(db);
+                botsSnapshot.forEach(botDoc => {
+                    batch.delete(botDoc.ref);
+                });
+
+                // 2. Удаляем аккаунт
+                batch.delete(doc(db, "accounts", currentUserSession.uid));
+                
+                await batch.commit();
                 
                 localStorage.removeItem('soaps_user');
                 
-                alert("Аккаунт удален. Вы будете перенаправлены на страницу регистрации.");
+                alert("Аккаунт и все ваши боты удалены. Вы будете перенаправлены на страницу регистрации.");
                 window.location.href = 'registration.html';
 
             } catch (error) {

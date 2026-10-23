@@ -171,9 +171,9 @@
                 const userDoc = querySnapshot.docs[0];
                 const userData = userDoc.data();
 
-                // Сохраняем сессию со всеми нужными полями
+                // Сохраняем сессию с uid
                 const sessionUser = {
-                    id: userData.id,
+                    uid: userData.uid,          // Неизменяемый ID
                     username: userData.username,
                     displayName: userData.displayName,
                     avatar: userData.avatar || "",
